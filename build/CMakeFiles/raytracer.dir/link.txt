@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/raytracer.dir/src/cpu/main.o CMakeFiles/raytracer.dir/src/gpu/render.o CMakeFiles/raytracer.dir/cmake_device_link.o -o raytracer   -L/usr/lib/x86_64-linux-gnu/stubs  -L/usr/lib/gcc/x86_64-linux-gnu/12  -lcudadevrt -lcudart_static -lrt -lpthread -ldl 
