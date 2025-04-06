@@ -11,7 +11,7 @@ CUDA_FLAGS = -std=c++17 -arch=native
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/christianw/cuda-raytracer/include
+CXX_INCLUDES = -I/home/christianw/raytracer-cuda/include
 
 CXX_FLAGS = 
 

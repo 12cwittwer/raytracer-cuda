@@ -1,4 +1,4 @@
-CMakeFiles/raytracer.dir/src/gpu/render.o : /home/christianw/cuda-raytracer/src/gpu/render.cu \
+CMakeFiles/raytracer.dir/src/gpu/render.o : /home/christianw/raytracer-cuda/src/gpu/render.cu \
     /usr/include/stdc-predef.h \
     /usr/include/cuda_runtime.h \
     /usr/include/crt/host_config.h \
@@ -180,9 +180,9 @@ CMakeFiles/raytracer.dir/src/gpu/render.o : /home/christianw/cuda-raytracer/src/
     /usr/include/c++/12/utility \
     /usr/include/c++/12/bits/stl_relops.h \
     /usr/include/c++/12/initializer_list \
-    /home/christianw/cuda-raytracer/include/raytracer/ray.h \
-    /home/christianw/cuda-raytracer/include/raytracer/vec3.h \
-    /home/christianw/cuda-raytracer/include/raytracer/cuda_compat.h \
+    /home/christianw/raytracer-cuda/include/raytracer/ray.h \
+    /home/christianw/raytracer-cuda/include/raytracer/vec3.h \
+    /home/christianw/raytracer-cuda/include/raytracer/cuda_compat.h \
     /usr/include/c++/12/iostream \
     /usr/include/c++/12/ostream \
     /usr/include/c++/12/ios \

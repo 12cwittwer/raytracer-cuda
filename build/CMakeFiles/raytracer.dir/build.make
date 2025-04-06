@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/christianw/cuda-raytracer
+CMAKE_SOURCE_DIR = /home/christianw/raytracer-cuda
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/christianw/cuda-raytracer/build
+CMAKE_BINARY_DIR = /home/christianw/raytracer-cuda/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/raytracer.dir/depend.make
@@ -70,25 +70,25 @@ include CMakeFiles/raytracer.dir/progress.make
 include CMakeFiles/raytracer.dir/flags.make
 
 CMakeFiles/raytracer.dir/src/cpu/main.o: CMakeFiles/raytracer.dir/flags.make
-CMakeFiles/raytracer.dir/src/cpu/main.o: /home/christianw/cuda-raytracer/src/cpu/main.cpp
+CMakeFiles/raytracer.dir/src/cpu/main.o: /home/christianw/raytracer-cuda/src/cpu/main.cpp
 CMakeFiles/raytracer.dir/src/cpu/main.o: CMakeFiles/raytracer.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/christianw/cuda-raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/raytracer.dir/src/cpu/main.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/raytracer.dir/src/cpu/main.o -MF CMakeFiles/raytracer.dir/src/cpu/main.o.d -o CMakeFiles/raytracer.dir/src/cpu/main.o -c /home/christianw/cuda-raytracer/src/cpu/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/christianw/raytracer-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/raytracer.dir/src/cpu/main.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/raytracer.dir/src/cpu/main.o -MF CMakeFiles/raytracer.dir/src/cpu/main.o.d -o CMakeFiles/raytracer.dir/src/cpu/main.o -c /home/christianw/raytracer-cuda/src/cpu/main.cpp
 
 CMakeFiles/raytracer.dir/src/cpu/main.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/raytracer.dir/src/cpu/main.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/christianw/cuda-raytracer/src/cpu/main.cpp > CMakeFiles/raytracer.dir/src/cpu/main.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/christianw/raytracer-cuda/src/cpu/main.cpp > CMakeFiles/raytracer.dir/src/cpu/main.i
 
 CMakeFiles/raytracer.dir/src/cpu/main.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/raytracer.dir/src/cpu/main.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/christianw/cuda-raytracer/src/cpu/main.cpp -o CMakeFiles/raytracer.dir/src/cpu/main.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/christianw/raytracer-cuda/src/cpu/main.cpp -o CMakeFiles/raytracer.dir/src/cpu/main.s
 
 CMakeFiles/raytracer.dir/src/gpu/render.o: CMakeFiles/raytracer.dir/flags.make
 CMakeFiles/raytracer.dir/src/gpu/render.o: CMakeFiles/raytracer.dir/includes_CUDA.rsp
-CMakeFiles/raytracer.dir/src/gpu/render.o: /home/christianw/cuda-raytracer/src/gpu/render.cu
+CMakeFiles/raytracer.dir/src/gpu/render.o: /home/christianw/raytracer-cuda/src/gpu/render.cu
 CMakeFiles/raytracer.dir/src/gpu/render.o: CMakeFiles/raytracer.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/christianw/cuda-raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CUDA object CMakeFiles/raytracer.dir/src/gpu/render.o"
-	/usr/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/raytracer.dir/src/gpu/render.o -MF CMakeFiles/raytracer.dir/src/gpu/render.o.d -x cu -rdc=true -c /home/christianw/cuda-raytracer/src/gpu/render.cu -o CMakeFiles/raytracer.dir/src/gpu/render.o
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/christianw/raytracer-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CUDA object CMakeFiles/raytracer.dir/src/gpu/render.o"
+	/usr/bin/nvcc -forward-unknown-to-host-compiler $(CUDA_DEFINES) $(CUDA_INCLUDES) $(CUDA_FLAGS) -MD -MT CMakeFiles/raytracer.dir/src/gpu/render.o -MF CMakeFiles/raytracer.dir/src/gpu/render.o.d -x cu -rdc=true -c /home/christianw/raytracer-cuda/src/gpu/render.cu -o CMakeFiles/raytracer.dir/src/gpu/render.o
 
 CMakeFiles/raytracer.dir/src/gpu/render.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CUDA source to CMakeFiles/raytracer.dir/src/gpu/render.i"
@@ -112,7 +112,7 @@ CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/build.mak
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/deviceLinkLibs.rsp
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/deviceObjects1.rsp
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/dlink.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/christianw/cuda-raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CUDA device code CMakeFiles/raytracer.dir/cmake_device_link.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/christianw/raytracer-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CUDA device code CMakeFiles/raytracer.dir/cmake_device_link.o"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/raytracer.dir/dlink.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -132,7 +132,7 @@ raytracer: CMakeFiles/raytracer.dir/src/gpu/render.o
 raytracer: CMakeFiles/raytracer.dir/build.make
 raytracer: CMakeFiles/raytracer.dir/cmake_device_link.o
 raytracer: CMakeFiles/raytracer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/christianw/cuda-raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable raytracer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/christianw/raytracer-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable raytracer"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/raytracer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -144,6 +144,6 @@ CMakeFiles/raytracer.dir/clean:
 .PHONY : CMakeFiles/raytracer.dir/clean
 
 CMakeFiles/raytracer.dir/depend:
-	cd /home/christianw/cuda-raytracer/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/christianw/cuda-raytracer /home/christianw/cuda-raytracer /home/christianw/cuda-raytracer/build /home/christianw/cuda-raytracer/build /home/christianw/cuda-raytracer/build/CMakeFiles/raytracer.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/christianw/raytracer-cuda/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/christianw/raytracer-cuda /home/christianw/raytracer-cuda /home/christianw/raytracer-cuda/build /home/christianw/raytracer-cuda/build /home/christianw/raytracer-cuda/build/CMakeFiles/raytracer.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/raytracer.dir/depend
 

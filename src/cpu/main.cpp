@@ -530,9 +530,9 @@ void final() {
     // === Camera ===
     camera cam;
     cam.aspect_ratio = 1.0;
-    cam.image_width = 600;
-    cam.samples_per_pixel = 400;
-    cam.max_depth = 50;
+    cam.image_width = 300; // 600
+    cam.samples_per_pixel = 100; // 400
+    cam.max_depth = 20; // 50
     cam.background = color(0,0,0);
     cam.vfov = 40;
     cam.lookfrom = point3(278, 278, -800);
@@ -556,15 +556,317 @@ void final() {
     delete[] nodes;
 }
 
+void glass_box() {
+    const int max_quads = 100;
+    const int max_objects = 200;
+
+    quad* quads = new quad[max_quads];
+    hittable* objects = new hittable[max_objects];
+    bvh_node* nodes = new bvh_node[2 * max_objects];
+    lambertian* lambertians = new lambertian[3];
+    diffuse_light* lights = new diffuse_light[1];
+    dielectric* dielectrics = new dielectric[1];
+    material* materials = new material[5];
+
+    int quad_index = 0;
+    int object_count = 0;
+    int node_index = 0;
+
+    // Materials
+    lambertians[0] = { color(.73, .73, .73) }; // white walls
+    lights[0] = { color(15, 15, 15) };         // light
+    dielectrics[0] = { 1.5 };                  // glass
+
+    materials[0] = { material_type::lambertian, &lambertians[0] };
+    materials[1] = { material_type::diffuse_light, &lights[0] };
+    materials[2] = { material_type::dielectric, &dielectrics[0] };
+
+    // Floor, ceiling, back wall (white)
+    quads[quad_index] = { point3(0,0,0), vec3(555,0,0), vec3(0,0,555), &materials[0] }; // floor
+    objects[object_count++] = { hittable_type::quad, &quads[quad_index++] };
+
+    quads[quad_index] = { point3(555,555,555), vec3(-555,0,0), vec3(0,0,-555), &materials[0] }; // ceiling
+    objects[object_count++] = { hittable_type::quad, &quads[quad_index++] };
+
+    quads[quad_index] = { point3(0,0,555), vec3(555,0,0), vec3(0,555,0), &materials[0] }; // back
+    objects[object_count++] = { hittable_type::quad, &quads[quad_index++] };
+
+    // Light
+    quads[quad_index] = { point3(213, 554, 227), vec3(130,0,0), vec3(0,0,105), &materials[1] };
+    objects[object_count++] = { hittable_type::quad, &quads[quad_index++] };
+
+    // Glass box - constructed as 6 quads in a BVH
+    int glass_start = object_count;
+    create_box(point3(0, 0, 0), point3(165, 165, 165), &materials[2], quads, objects, quad_index, object_count);
+    
+    // Build BVH over glass box faces
+    bvh_node* glass_nodes = new bvh_node[12]; // 6 faces => max 2n-1 = 11, round up
+    int glass_node_index = 0;
+    int glass_root_index = build_bvh(objects, glass_start, object_count, glass_nodes, glass_node_index);
+
+    hittable glass_box_bvh = { hittable_type::bvh_node, &glass_nodes[glass_root_index] };
+
+    // Apply rotate + translate
+    rotate_y* rotate_glass = new rotate_y[1];
+    translate* translate_glass = new translate[1];
+
+    rotate_glass[0] = rotate_y(&glass_box_bvh, 25);
+    hittable glass_rotated = { hittable_type::rotate_y, &rotate_glass[0] };
+
+    translate_glass[0] = translate(&glass_rotated, vec3(200, 0, 200));
+    objects[object_count++] = { hittable_type::translate, &translate_glass[0] };
+
+    // Final BVH for full scene
+    int root_index = build_bvh(objects, 0, object_count, nodes, node_index);
+    hittable world = { hittable_type::bvh_node, &nodes[root_index] };
+
+    // Camera
+    camera cam;
+    cam.aspect_ratio = 1.0;
+    cam.image_width = 600;
+    cam.samples_per_pixel = 200;
+    cam.max_depth = 50;
+    cam.background = color(0,0,0);
+    
+    cam.vfov = 40;
+    cam.lookfrom = point3(278, 278, -800);
+    cam.lookat = point3(278, 278, 0);
+    cam.vup = vec3(0,1,0);
+
+    cam.defocus_angle = 0;
+    cam.render(world);
+
+    // Cleanup
+    delete[] quads;
+    delete[] objects;
+    delete[] lambertians;
+    delete[] lights;
+    delete[] dielectrics;
+    delete[] materials;
+    delete[] nodes;
+    delete[] glass_nodes;
+    delete[] rotate_glass;
+    delete[] translate_glass;
+}
+
+void glass_orb() {
+    const int max_objects = 10;
+
+    // === Storage ===
+    lambertian* lambertians = new lambertian[2];
+    dielectric* dielectrics = new dielectric[1];
+    diffuse_light* lights = new diffuse_light[1];
+    material* materials = new material[4];
+
+    gpu_sphere* spheres = new gpu_sphere[3];
+    hittable* objects = new hittable[max_objects];
+
+    int object_count = 0;
+    int material_index = 0;
+
+    // === Ground ===
+    lambertians[0] = { color(0.5, 0.5, 0.5) };
+    materials[material_index++] = { material_type::lambertian, &lambertians[0] };
+
+    spheres[object_count] = { point3(0, -1000, 0), 1000, &materials[material_index - 1] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[object_count] };
+
+    // === Inner solid color sphere ===
+    lambertians[1] = { color(1.0, 0.1, 0.1) };  // red
+    materials[material_index++] = { material_type::lambertian, &lambertians[1] };
+
+    spheres[object_count] = { point3(0, 1, 0), 0.5, &materials[material_index - 1] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[object_count] };
+
+    // === Outer glass sphere ===
+    dielectrics[0] = { 1.5 };
+    materials[material_index++] = { material_type::dielectric, &dielectrics[0] };
+
+    spheres[object_count] = { point3(0, 1, 0), 1.0, &materials[material_index - 1] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[object_count] };
+
+    // === Optional: Light source above ===
+    lights[0] = { color(10, 10, 10) };
+    materials[material_index++] = { material_type::diffuse_light, &lights[0] };
+
+    quad* quads = new quad[1];
+    quads[0] = { point3(-2, 5, -2), vec3(4, 0, 0), vec3(0, 0, 4), &materials[material_index - 1] };
+    objects[object_count++] = { hittable_type::quad, &quads[0] };
+
+    // === BVH ===
+    bvh_node* nodes = new bvh_node[2 * object_count];
+    int node_index = 0;
+    int root_index = build_bvh(objects, 0, object_count, nodes, node_index);
+    hittable world = { hittable_type::bvh_node, &nodes[root_index] };
+
+    // === Camera ===
+    camera cam;
+    cam.aspect_ratio = 1.0;
+    cam.image_width = 600;
+    cam.samples_per_pixel = 200;
+    cam.max_depth = 100;
+    cam.background = color(0,0,0);
+
+    cam.vfov = 40;
+    cam.lookfrom = point3(0, 2, -5);
+    cam.lookat   = point3(0, 1, 0);
+    cam.vup      = vec3(0,1,0);
+    cam.defocus_angle = 0.0;
+
+    cam.render(world);
+
+    // === Cleanup ===
+    delete[] lambertians;
+    delete[] dielectrics;
+    delete[] lights;
+    delete[] materials;
+    delete[] spheres;
+    delete[] objects;
+    delete[] nodes;
+    delete[] quads;
+}
+
+void final_scene() {
+    const int max_objects = 1000;
+    const int max_spheres = 1000;
+    const int max_quads = 10;
+    const int max_transforms = 20;
+
+    hittable* objects = new hittable[max_objects];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    quad* quads = new quad[max_quads];
+    translate* translates = new translate[max_transforms];
+    rotate_y* rotates = new rotate_y[max_transforms];
+    gpu_hittable_list* lists = new gpu_hittable_list[4];
+
+    lambertian* lambertians = new lambertian[20];
+    metal* metals = new metal[5];
+    dielectric* dielectrics = new dielectric[5];
+    diffuse_light* lights = new diffuse_light[2];
+    material* materials = new material[30];
+
+    int object_count = 0, sphere_count = 0, quad_count = 0;
+    int lambertian_count = 0, metal_count = 0, dielectric_count = 0, light_count = 0, material_count = 0;
+    int translate_count = 0, rotate_count = 0, list_count = 0;
+
+    // === Ground Boxes ===
+    lambertians[lambertian_count] = { color(0.48, 0.83, 0.53) };
+    materials[material_count] = { material_type::lambertian, &lambertians[lambertian_count++] };
+    material* ground_mat = &materials[material_count++];
+
+    int boxes_per_side = 20;
+    for (int i = 0; i < boxes_per_side; i++) {
+        for (int j = 0; j < boxes_per_side; j++) {
+            if (object_count + 6 >= max_objects) continue;
+
+            auto w = 100.0;
+            auto x0 = -1000.0 + i * w;
+            auto z0 = -1000.0 + j * w;
+            auto y1 = random_double(1, 101);
+
+            create_box(point3(x0, 0, z0), point3(x0 + w, y1, z0 + w), ground_mat,
+                       quads, objects, quad_count, object_count);
+        }
+    }
+
+    // === Light ===
+    lights[light_count] = { color(7, 7, 7) };
+    materials[material_count] = { material_type::diffuse_light, &lights[light_count++] };
+    quads[quad_count] = { point3(123,554,147), vec3(300,0,0), vec3(0,0,265), &materials[material_count++] };
+    objects[object_count++] = { hittable_type::quad, &quads[quad_count++] };
+
+    // === Glass Sphere ===
+    dielectrics[dielectric_count] = { 1.5 };
+    materials[material_count] = { material_type::dielectric, &dielectrics[dielectric_count++] };
+    spheres[sphere_count] = { point3(360,150,145), 70, &materials[material_count++] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
+
+    // === Metal Sphere Inside Glass ===
+    metals[metal_count] = { color(0.8, 0.3, 0.1), 0.0 };
+    materials[material_count] = { material_type::metal, &metals[metal_count++] };
+    spheres[sphere_count] = { point3(360,150,145), 40, &materials[material_count++] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
+
+    // === Another metal sphere ===
+    metals[metal_count] = { color(0.8, 0.8, 0.9), 1.0 };
+    materials[material_count] = { material_type::metal, &metals[metal_count++] };
+    spheres[sphere_count] = { point3(0, 150, 145), 50, &materials[material_count++] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
+
+    // === Sphere cluster ===
+    lambertians[lambertian_count] = { color(.73, .73, .73) };
+    materials[material_count] = { material_type::lambertian, &lambertians[lambertian_count++] };
+    material* white = &materials[material_count++];
+
+    int cluster_start = object_count;
+    for (int j = 0; j < 1000 && object_count < max_objects; j++) {
+        point3 center = random_vec3(0, 165);
+        spheres[sphere_count] = { center, 10, white };
+        objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
+    }
+
+    lists[list_count] = { &objects[cluster_start], object_count - cluster_start };
+    hittable list = { hittable_type::hittable_list, &lists[list_count++] };
+
+    rotates[rotate_count] = rotate_y(&list, 15);
+    hittable rotated = { hittable_type::rotate_y, &rotates[rotate_count++] };
+
+    translates[translate_count] = translate(&rotated, vec3(-100, 270, 395));
+    objects[object_count++] = { hittable_type::translate, &translates[translate_count++] };
+
+    // === Build BVH ===
+    bvh_node* nodes = new bvh_node[2 * object_count];
+    int node_index = 0;
+    int root_index = build_bvh(objects, 0, object_count, nodes, node_index);
+    hittable world = { hittable_type::bvh_node, &nodes[root_index] };
+
+    // === Camera ===
+    camera cam;
+    cam.aspect_ratio = 1.0;
+    cam.image_width = 600;
+    cam.samples_per_pixel = 200;
+    cam.max_depth = 50;
+    cam.background = color(0,0,0);
+
+    cam.vfov = 40;
+    cam.lookfrom = point3(478, 278, -600);
+    cam.lookat = point3(278, 278, 0);
+    cam.vup = vec3(0,1,0);
+    cam.defocus_angle = 0;
+
+    cam.render(world);
+
+    // Cleanup
+    delete[] objects;
+    delete[] spheres;
+    delete[] quads;
+    delete[] translates;
+    delete[] rotates;
+    delete[] lists;
+    delete[] lambertians;
+    delete[] metals;
+    delete[] dielectrics;
+    delete[] lights;
+    delete[] materials;
+    delete[] nodes;
+}
+
+void my_scene() {
+
+}
 
 
 int main() {
-    switch (4) {
-        case 1: spheres();  break;
-        case 2: quads();    break;
-        case 3: light();    break;
-        case 4: cornell();  break;
-        case 5: final();    break;
+    switch (1) {
+        case 1: spheres();      break;
+        case 2: quads();        break;
+        case 3: light();        break;
+        case 4: cornell();      break;
+        case 5: final();        break;
+        case 6: glass_box();    break;
+        case 7: glass_orb();    break;
+        case 8: final_scene();  break; // Seg Fault
+        case 9: my_scene();     break;
     }
 
     return 0;

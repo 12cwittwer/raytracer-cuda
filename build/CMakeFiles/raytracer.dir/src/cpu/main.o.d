@@ -1,5 +1,5 @@
 CMakeFiles/raytracer.dir/src/cpu/main.o: \
- /home/christianw/cuda-raytracer/src/cpu/main.cpp \
+ /home/christianw/raytracer-cuda/src/cpu/main.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/13/iostream \
  /usr/include/c++/13/bits/requires_hosted.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
@@ -150,9 +150,9 @@ CMakeFiles/raytracer.dir/src/cpu/main.o: \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
  /usr/include/c++/13/bits/istream.tcc \
- /home/christianw/cuda-raytracer/include/raytracer/bvh.h \
- /home/christianw/cuda-raytracer/include/raytracer/hittable.h \
- /home/christianw/cuda-raytracer/include/raytracer/rtweekend.h \
+ /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
+ /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
+ /home/christianw/raytracer-cuda/include/raytracer/rtweekend.h \
  /usr/include/c++/13/cmath /usr/include/math.h \
  /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
@@ -176,21 +176,21 @@ CMakeFiles/raytracer.dir/src/cpu/main.o: \
  /usr/include/c++/13/tr1/poly_hermite.tcc \
  /usr/include/c++/13/tr1/poly_laguerre.tcc \
  /usr/include/c++/13/tr1/riemann_zeta.tcc \
- /home/christianw/cuda-raytracer/include/raytracer/cuda_compat.h \
- /home/christianw/cuda-raytracer/include/raytracer/vec3.h \
- /home/christianw/cuda-raytracer/include/raytracer/ray.h \
- /home/christianw/cuda-raytracer/include/raytracer/color.h \
- /home/christianw/cuda-raytracer/include/raytracer/interval.h \
- /home/christianw/cuda-raytracer/include/raytracer/aabb.h \
- /home/christianw/cuda-raytracer/include/raytracer/bvh.h \
- /home/christianw/cuda-raytracer/include/raytracer/sphere_gpu.h \
- /home/christianw/cuda-raytracer/include/raytracer/quad.h \
- /home/christianw/cuda-raytracer/include/raytracer/material.h \
- /home/christianw/cuda-raytracer/include/raytracer/random_utils.h \
- /home/christianw/cuda-raytracer/include/raytracer/hittable_dispatch.h \
- /home/christianw/cuda-raytracer/include/raytracer/hittable_dispatch_impl.h \
- /home/christianw/cuda-raytracer/include/raytracer/instances.h \
- /home/christianw/cuda-raytracer/include/raytracer/bvh_builder.h \
+ /home/christianw/raytracer-cuda/include/raytracer/cuda_compat.h \
+ /home/christianw/raytracer-cuda/include/raytracer/vec3.h \
+ /home/christianw/raytracer-cuda/include/raytracer/ray.h \
+ /home/christianw/raytracer-cuda/include/raytracer/color.h \
+ /home/christianw/raytracer-cuda/include/raytracer/interval.h \
+ /home/christianw/raytracer-cuda/include/raytracer/aabb.h \
+ /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
+ /home/christianw/raytracer-cuda/include/raytracer/sphere_gpu.h \
+ /home/christianw/raytracer-cuda/include/raytracer/quad.h \
+ /home/christianw/raytracer-cuda/include/raytracer/material.h \
+ /home/christianw/raytracer-cuda/include/raytracer/random_utils.h \
+ /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h \
+ /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch_impl.h \
+ /home/christianw/raytracer-cuda/include/raytracer/instances.h \
+ /home/christianw/raytracer-cuda/include/raytracer/bvh_builder.h \
  /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
  /usr/include/c++/13/bits/algorithmfwd.h \
  /usr/include/c++/13/bits/stl_heap.h \
@@ -198,11 +198,11 @@ CMakeFiles/raytracer.dir/src/cpu/main.o: \
  /usr/include/c++/13/bits/stl_tempbuf.h \
  /usr/include/c++/13/pstl/glue_algorithm_defs.h \
  /usr/include/c++/13/pstl/execution_defs.h \
- /home/christianw/cuda-raytracer/include/raytracer/camera.h \
- /home/christianw/cuda-raytracer/include/raytracer/hittable_list.h \
- /home/christianw/cuda-raytracer/include/raytracer/hittable.h \
- /home/christianw/cuda-raytracer/include/raytracer/hittable_list.h \
- /home/christianw/cuda-raytracer/include/raytracer/material.h \
- /home/christianw/cuda-raytracer/include/raytracer/quad.h \
- /home/christianw/cuda-raytracer/include/raytracer/sphere_gpu.h \
- /home/christianw/cuda-raytracer/include/raytracer/instances.h
+ /home/christianw/raytracer-cuda/include/raytracer/camera.h \
+ /home/christianw/raytracer-cuda/include/raytracer/hittable_list.h \
+ /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
+ /home/christianw/raytracer-cuda/include/raytracer/hittable_list.h \
+ /home/christianw/raytracer-cuda/include/raytracer/material.h \
+ /home/christianw/raytracer-cuda/include/raytracer/quad.h \
+ /home/christianw/raytracer-cuda/include/raytracer/sphere_gpu.h \
+ /home/christianw/raytracer-cuda/include/raytracer/instances.h
