@@ -3,7 +3,6 @@
 
 #include "rtweekend.h"
 #include "aabb.h"
-#include "bvh.h"
 
 struct material;
 

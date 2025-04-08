@@ -17,6 +17,13 @@ inline double linear_to_gamma(double linear_component)
     return 0;
 }
 
+// Clamp utility
+inline double clamp(double x, double min, double max) {
+    if (x < min) return min;
+    if (x > max) return max;
+    return x;
+}
+
 inline void write_color(std::ostream& out, const color& pixel_color) {
     auto r = pixel_color.x();
     auto g = pixel_color.y();
@@ -28,12 +35,23 @@ inline void write_color(std::ostream& out, const color& pixel_color) {
     b = linear_to_gamma(b);
 
     // Clamp the values manually
-    static const interval intensity(0.000, 0.999);
-    int rbyte = int(256 * intensity.clamp(r));
-    int gbyte = int(256 * intensity.clamp(g));
-    int bbyte = int(256 * intensity.clamp(b));
+    int rbyte = static_cast<int>(256 * clamp(r, 0.000, 0.999));
+    int gbyte = static_cast<int>(256 * clamp(g, 0.000, 0.999));
+    int bbyte = static_cast<int>(256 * clamp(b, 0.000, 0.999));
 
     out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
+}
+
+inline void write_ppm(std::ostream& out, color* framebuffer, int height, int width) {
+    // PPM header
+    out << "P3\n" << width << " " << height << "\n255\n";
+
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            write_color(out, framebuffer[j * width + i]);
+        }
+    }
+
 }
 #endif
 

@@ -180,7 +180,25 @@ CMakeFiles/raytracer.dir/src/gpu/render.o : /home/christianw/raytracer-cuda/src/
     /usr/include/c++/12/utility \
     /usr/include/c++/12/bits/stl_relops.h \
     /usr/include/c++/12/initializer_list \
-    /home/christianw/raytracer-cuda/include/raytracer/ray.h \
+    /usr/include/curand_kernel.h \
+    /usr/include/nv/target \
+    /usr/include/nv/detail/__target_macros \
+    /usr/include/nv/detail/__preprocessor \
+    /usr/include/curand.h \
+    /usr/include/curand_discrete.h \
+    /usr/include/curand_precalc.h \
+    /usr/include/curand_mrg32k3a.h \
+    /usr/include/curand_mtgp32_kernel.h \
+    /usr/include/memory.h \
+    /usr/include/curand_mtgp32.h \
+    /usr/include/curand_philox4x32_x.h \
+    /usr/include/curand_globals.h \
+    /usr/include/curand_uniform.h \
+    /usr/include/curand_normal.h \
+    /usr/include/curand_normal_static.h \
+    /usr/include/curand_lognormal.h \
+    /usr/include/curand_poisson.h \
+    /usr/include/curand_discrete2.h \
     /home/christianw/raytracer-cuda/include/raytracer/vec3.h \
     /home/christianw/raytracer-cuda/include/raytracer/cuda_compat.h \
     /usr/include/c++/12/iostream \
@@ -276,4 +294,21 @@ CMakeFiles/raytracer.dir/src/gpu/render.o : /home/christianw/raytracer-cuda/src/
     /usr/include/c++/12/bits/basic_ios.tcc \
     /usr/include/c++/12/bits/ostream.tcc \
     /usr/include/c++/12/istream \
-    /usr/include/c++/12/bits/istream.tcc
+    /usr/include/c++/12/bits/istream.tcc \
+    /home/christianw/raytracer-cuda/include/raytracer/ray.h \
+    /home/christianw/raytracer-cuda/include/raytracer/interval.h \
+    /home/christianw/raytracer-cuda/include/raytracer/rtweekend.h \
+    /home/christianw/raytracer-cuda/include/raytracer/color.h \
+    /home/christianw/raytracer-cuda/include/raytracer/camera_data.h \
+    /home/christianw/raytracer-cuda/include/raytracer/random_utils.h \
+    /home/christianw/raytracer-cuda/include/raytracer/material.h \
+    /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
+    /home/christianw/raytracer-cuda/include/raytracer/aabb.h \
+    /home/christianw/raytracer-cuda/include/raytracer/sphere_gpu.h \
+    /home/christianw/raytracer-cuda/include/raytracer/quad.h \
+    /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h \
+    /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch_impl.h \
+    /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
+    /home/christianw/raytracer-cuda/include/raytracer/instances.h \
+    /home/christianw/raytracer-cuda/include/raytracer/device_ray_color.h \
+    /home/christianw/raytracer-cuda/include/raytracer/render.h

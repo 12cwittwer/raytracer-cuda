@@ -7,6 +7,7 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /home/christianw/raytracer-cuda/include/raytracer/bvh.h
  /home/christianw/raytracer-cuda/include/raytracer/bvh_builder.h
  /home/christianw/raytracer-cuda/include/raytracer/camera.h
+ /home/christianw/raytracer-cuda/include/raytracer/camera_data.h
  /home/christianw/raytracer-cuda/include/raytracer/color.h
  /home/christianw/raytracer-cuda/include/raytracer/cuda_compat.h
  /home/christianw/raytracer-cuda/include/raytracer/hittable.h
@@ -19,12 +20,14 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /home/christianw/raytracer-cuda/include/raytracer/quad.h
  /home/christianw/raytracer-cuda/include/raytracer/random_utils.h
  /home/christianw/raytracer-cuda/include/raytracer/ray.h
+ /home/christianw/raytracer-cuda/include/raytracer/render.h
  /home/christianw/raytracer-cuda/include/raytracer/rtweekend.h
  /home/christianw/raytracer-cuda/include/raytracer/sphere_gpu.h
  /home/christianw/raytracer-cuda/include/raytracer/vec3.h
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
  /usr/include/asm-generic/errno.h
+ /usr/include/builtin_types.h
  /usr/include/c++/13/algorithm
  /usr/include/c++/13/backward/binders.h
  /usr/include/c++/13/bit
@@ -79,6 +82,7 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /usr/include/c++/13/bits/stl_iterator_base_funcs.h
  /usr/include/c++/13/bits/stl_iterator_base_types.h
  /usr/include/c++/13/bits/stl_pair.h
+ /usr/include/c++/13/bits/stl_relops.h
  /usr/include/c++/13/bits/stl_tempbuf.h
  /usr/include/c++/13/bits/streambuf.tcc
  /usr/include/c++/13/bits/streambuf_iterator.h
@@ -111,12 +115,14 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /usr/include/c++/13/iostream
  /usr/include/c++/13/istream
  /usr/include/c++/13/limits
+ /usr/include/c++/13/math.h
  /usr/include/c++/13/new
  /usr/include/c++/13/ostream
  /usr/include/c++/13/pstl/execution_defs.h
  /usr/include/c++/13/pstl/glue_algorithm_defs.h
  /usr/include/c++/13/pstl/pstl_config.h
  /usr/include/c++/13/stdexcept
+ /usr/include/c++/13/stdlib.h
  /usr/include/c++/13/streambuf
  /usr/include/c++/13/string
  /usr/include/c++/13/string_view
@@ -136,20 +142,59 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /usr/include/c++/13/tuple
  /usr/include/c++/13/type_traits
  /usr/include/c++/13/typeinfo
+ /usr/include/c++/13/utility
+ /usr/include/channel_descriptor.h
+ /usr/include/crt/host_config.h
+ /usr/include/crt/host_defines.h
  /usr/include/ctype.h
+ /usr/include/cuda_device_runtime_api.h
+ /usr/include/cuda_runtime.h
+ /usr/include/cuda_runtime_api.h
+ /usr/include/curand.h
+ /usr/include/curand_discrete.h
+ /usr/include/curand_discrete2.h
+ /usr/include/curand_globals.h
+ /usr/include/curand_kernel.h
+ /usr/include/curand_lognormal.h
+ /usr/include/curand_mrg32k3a.h
+ /usr/include/curand_mtgp32.h
+ /usr/include/curand_mtgp32_kernel.h
+ /usr/include/curand_normal.h
+ /usr/include/curand_normal_static.h
+ /usr/include/curand_philox4x32_x.h
+ /usr/include/curand_poisson.h
+ /usr/include/curand_precalc.h
+ /usr/include/curand_uniform.h
+ /usr/include/device_types.h
+ /usr/include/driver_functions.h
+ /usr/include/driver_types.h
  /usr/include/endian.h
  /usr/include/errno.h
  /usr/include/features-time64.h
  /usr/include/features.h
+ /usr/include/library_types.h
+ /usr/include/limits.h
  /usr/include/linux/errno.h
+ /usr/include/linux/limits.h
  /usr/include/locale.h
  /usr/include/math.h
+ /usr/include/memory.h
+ /usr/include/nv/detail/__preprocessor
+ /usr/include/nv/detail/__target_macros
+ /usr/include/nv/target
  /usr/include/pthread.h
  /usr/include/sched.h
  /usr/include/stdc-predef.h
  /usr/include/stdio.h
  /usr/include/stdlib.h
+ /usr/include/string.h
+ /usr/include/strings.h
+ /usr/include/surface_types.h
+ /usr/include/texture_types.h
  /usr/include/time.h
+ /usr/include/vector_functions.h
+ /usr/include/vector_functions.hpp
+ /usr/include/vector_types.h
  /usr/include/wchar.h
  /usr/include/wctype.h
  /usr/include/x86_64-linux-gnu/asm/errno.h
@@ -167,12 +212,15 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /usr/include/x86_64-linux-gnu/bits/iscanonical.h
  /usr/include/x86_64-linux-gnu/bits/libc-header-start.h
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h
+ /usr/include/x86_64-linux-gnu/bits/local_lim.h
  /usr/include/x86_64-linux-gnu/bits/locale.h
  /usr/include/x86_64-linux-gnu/bits/long-double.h
  /usr/include/x86_64-linux-gnu/bits/math-vector.h
  /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h
  /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h
+ /usr/include/x86_64-linux-gnu/bits/posix1_lim.h
+ /usr/include/x86_64-linux-gnu/bits/posix2_lim.h
  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h
  /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h
  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h
@@ -216,11 +264,13 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h
  /usr/include/x86_64-linux-gnu/bits/typesizes.h
  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h
+ /usr/include/x86_64-linux-gnu/bits/uio_lim.h
  /usr/include/x86_64-linux-gnu/bits/waitflags.h
  /usr/include/x86_64-linux-gnu/bits/waitstatus.h
  /usr/include/x86_64-linux-gnu/bits/wchar.h
  /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h
  /usr/include/x86_64-linux-gnu/bits/wordsize.h
+ /usr/include/x86_64-linux-gnu/bits/xopen_lim.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h
  /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h
@@ -238,13 +288,31 @@ CMakeFiles/raytracer.dir/src/cpu/main.o
  /usr/include/x86_64-linux-gnu/sys/select.h
  /usr/include/x86_64-linux-gnu/sys/single_threaded.h
  /usr/include/x86_64-linux-gnu/sys/types.h
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/limits.h
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h
 
 CMakeFiles/raytracer.dir/src/gpu/render.o
  /home/christianw/raytracer-cuda/src/gpu/render.cu
+ /home/christianw/raytracer-cuda/include/raytracer/aabb.h
+ /home/christianw/raytracer-cuda/include/raytracer/bvh.h
+ /home/christianw/raytracer-cuda/include/raytracer/camera_data.h
+ /home/christianw/raytracer-cuda/include/raytracer/color.h
  /home/christianw/raytracer-cuda/include/raytracer/cuda_compat.h
+ /home/christianw/raytracer-cuda/include/raytracer/device_ray_color.h
+ /home/christianw/raytracer-cuda/include/raytracer/hittable.h
+ /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h
+ /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch_impl.h
+ /home/christianw/raytracer-cuda/include/raytracer/instances.h
+ /home/christianw/raytracer-cuda/include/raytracer/interval.h
+ /home/christianw/raytracer-cuda/include/raytracer/material.h
+ /home/christianw/raytracer-cuda/include/raytracer/quad.h
+ /home/christianw/raytracer-cuda/include/raytracer/random_utils.h
  /home/christianw/raytracer-cuda/include/raytracer/ray.h
+ /home/christianw/raytracer-cuda/include/raytracer/render.h
+ /home/christianw/raytracer-cuda/include/raytracer/rtweekend.h
+ /home/christianw/raytracer-cuda/include/raytracer/sphere_gpu.h
  /home/christianw/raytracer-cuda/include/raytracer/vec3.h
  /usr/include/alloca.h
  /usr/include/asm-generic/errno-base.h
@@ -373,6 +441,21 @@ CMakeFiles/raytracer.dir/src/gpu/render.o
  /usr/include/cuda_device_runtime_api.h
  /usr/include/cuda_runtime.h
  /usr/include/cuda_runtime_api.h
+ /usr/include/curand.h
+ /usr/include/curand_discrete.h
+ /usr/include/curand_discrete2.h
+ /usr/include/curand_globals.h
+ /usr/include/curand_kernel.h
+ /usr/include/curand_lognormal.h
+ /usr/include/curand_mrg32k3a.h
+ /usr/include/curand_mtgp32.h
+ /usr/include/curand_mtgp32_kernel.h
+ /usr/include/curand_normal.h
+ /usr/include/curand_normal_static.h
+ /usr/include/curand_philox4x32_x.h
+ /usr/include/curand_poisson.h
+ /usr/include/curand_precalc.h
+ /usr/include/curand_uniform.h
  /usr/include/device_atomic_functions.h
  /usr/include/device_atomic_functions.hpp
  /usr/include/device_launch_parameters.h
@@ -389,6 +472,10 @@ CMakeFiles/raytracer.dir/src/gpu/render.o
  /usr/include/linux/limits.h
  /usr/include/locale.h
  /usr/include/math.h
+ /usr/include/memory.h
+ /usr/include/nv/detail/__preprocessor
+ /usr/include/nv/detail/__target_macros
+ /usr/include/nv/target
  /usr/include/pthread.h
  /usr/include/sched.h
  /usr/include/sm_20_atomic_functions.h

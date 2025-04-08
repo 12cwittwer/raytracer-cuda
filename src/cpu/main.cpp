@@ -127,19 +127,19 @@ void spheres() {
         for (int b = -11; b < 11; b++) {
             if (sphere_count >= max_objects) continue;
 
-            auto choose_mat = random_double();
-            point3 center(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
+            auto choose_mat = cpu_random_double();
+            point3 center(a + 0.9 * cpu_random_double(), 0.2, b + 0.9 * cpu_random_double());
 
             if ((center - point3(4, 0.2, 0)).length() > 0.9) {
                 material* mat_ptr = nullptr;
 
                 if (choose_mat < 0.8) {
-                    color albedo = random_vec3() * random_vec3();
+                    color albedo = random_vec3_host() * random_vec3_host();
                     lambertians[lambertian_count++] = { albedo };
                     materials[material_count++] = { material_type::lambertian, &lambertians[lambertian_count - 1] };
                 } else if (choose_mat < 0.95) {
-                    color albedo = random_vec3(0.5, 1.0);
-                    double fuzz = random_double(0, 0.5);
+                    color albedo = random_vec3_host(0.5, 1.0);
+                    double fuzz = cpu_random_double(0, 0.5);
                     metals[metal_count++] = { albedo, fuzz };
                     materials[material_count++] = { material_type::metal, &metals[metal_count - 1] };
                 } else {
@@ -198,7 +198,7 @@ void spheres() {
     cam.focus_dist    = 10.0;
 
     // === Render ===
-    cam.render(root); // <- Pass BVH root hittable
+    cam.render_gpu(root); // <- Pass BVH root hittable
 
     // === Clean up ===
     delete[] lambertians;
@@ -430,6 +430,7 @@ void cornell() {
     cam.vup = vec3(0,1,0);
 
     cam.defocus_angle = 0;
+
     cam.render(world);
 
     // === Cleanup ===
@@ -539,6 +540,7 @@ void final() {
     cam.lookat = point3(278, 278, 0);
     cam.vup = vec3(0,1,0);
     cam.defocus_angle = 0;
+
     cam.render(world);
 
     // === Cleanup ===
@@ -634,6 +636,7 @@ void glass_box() {
     cam.vup = vec3(0,1,0);
 
     cam.defocus_angle = 0;
+
     cam.render(world);
 
     // Cleanup
@@ -762,7 +765,7 @@ void final_scene() {
             auto w = 100.0;
             auto x0 = -1000.0 + i * w;
             auto z0 = -1000.0 + j * w;
-            auto y1 = random_double(1, 101);
+            auto y1 = cpu_random_double(1, 101);
 
             create_box(point3(x0, 0, z0), point3(x0 + w, y1, z0 + w), ground_mat,
                        quads, objects, quad_count, object_count);
@@ -800,7 +803,7 @@ void final_scene() {
 
     int cluster_start = object_count;
     for (int j = 0; j < 1000 && object_count < max_objects; j++) {
-        point3 center = random_vec3(0, 165);
+        point3 center = random_vec3_host(0, 165);
         spheres[sphere_count] = { center, 10, white };
         objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
     }

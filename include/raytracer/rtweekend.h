@@ -19,20 +19,18 @@ __host__ __device__ inline double degrees_to_radians(double degrees) {
 }
 
 // Random Number Utilities (CPU-compatible only)
-inline double random_double() {
-    // Returns a random real in [0,1).
-    return std::rand() / (RAND_MAX + 1.0);
+inline double cpu_random_double() {
+    return rand() / (RAND_MAX + 1.0);
 }
 
-inline double random_double(double min, double max) {
-    // Returns a random real in [min,max).
-    return min + (max - min) * random_double();
+inline double cpu_random_double(double min, double max) {
+    return min + (max - min) * cpu_random_double();
 }
+
 
 // Common Headers (these are already CUDA-safe)
 #include "vec3.h"
 #include "ray.h"
 #include "color.h"
-#include "interval.h"
 
 #endif

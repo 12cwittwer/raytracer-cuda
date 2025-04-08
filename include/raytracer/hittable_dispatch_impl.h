@@ -2,11 +2,12 @@
 #define HITTABLE_DISPATCH_IMPL_H
 
 #include "hittable_dispatch.h"
+#include "hittable.h"
 #include "sphere_gpu.h"
 #include "bvh.h"  // Full definition of bvh_node included here
 #include "instances.h"
 
-__host__ __device__
+__host__ __device__ inline
 hit_record hit_hittable(const hittable& h, const ray& r, interval ray_t, hit_record& rec) {
     switch (h.type) {
         case hittable_type::sphere:
@@ -26,7 +27,7 @@ hit_record hit_hittable(const hittable& h, const ray& r, interval ray_t, hit_rec
     }
 }
 
-__host__ __device__
+__host__ __device__ inline
 aabb bounding_box(const hittable& h) {
     switch (h.type) {
         case hittable_type::sphere:

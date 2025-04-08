@@ -182,13 +182,42 @@ CMakeFiles/raytracer.dir/src/cpu/main.o: \
  /home/christianw/raytracer-cuda/include/raytracer/color.h \
  /home/christianw/raytracer-cuda/include/raytracer/interval.h \
  /home/christianw/raytracer-cuda/include/raytracer/aabb.h \
- /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
  /home/christianw/raytracer-cuda/include/raytracer/sphere_gpu.h \
  /home/christianw/raytracer-cuda/include/raytracer/quad.h \
  /home/christianw/raytracer-cuda/include/raytracer/material.h \
  /home/christianw/raytracer-cuda/include/raytracer/random_utils.h \
+ /usr/include/curand_kernel.h /usr/include/nv/target \
+ /usr/include/nv/detail/__target_macros \
+ /usr/include/nv/detail/__preprocessor /usr/include/c++/13/math.h \
+ /usr/include/curand.h /usr/include/cuda_runtime.h \
+ /usr/include/crt/host_config.h /usr/include/builtin_types.h \
+ /usr/include/device_types.h /usr/include/crt/host_defines.h \
+ /usr/include/driver_types.h /usr/include/vector_types.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/limits.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h \
+ /usr/include/limits.h /usr/include/x86_64-linux-gnu/bits/posix1_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/local_lim.h \
+ /usr/include/linux/limits.h \
+ /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
+ /usr/include/x86_64-linux-gnu/bits/uio_lim.h \
+ /usr/include/surface_types.h /usr/include/texture_types.h \
+ /usr/include/library_types.h /usr/include/channel_descriptor.h \
+ /usr/include/cuda_runtime_api.h /usr/include/cuda_device_runtime_api.h \
+ /usr/include/driver_functions.h /usr/include/vector_functions.h \
+ /usr/include/vector_functions.hpp /usr/include/c++/13/utility \
+ /usr/include/c++/13/bits/stl_relops.h /usr/include/curand_discrete.h \
+ /usr/include/curand_precalc.h /usr/include/curand_mrg32k3a.h \
+ /usr/include/curand_mtgp32_kernel.h /usr/include/c++/13/stdlib.h \
+ /usr/include/memory.h /usr/include/string.h /usr/include/strings.h \
+ /usr/include/curand_mtgp32.h /usr/include/curand_philox4x32_x.h \
+ /usr/include/curand_globals.h /usr/include/curand_uniform.h \
+ /usr/include/curand_normal.h /usr/include/curand_normal_static.h \
+ /usr/include/curand_lognormal.h /usr/include/curand_poisson.h \
+ /usr/include/curand_discrete2.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch_impl.h \
+ /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
  /home/christianw/raytracer-cuda/include/raytracer/instances.h \
  /home/christianw/raytracer-cuda/include/raytracer/bvh_builder.h \
  /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
@@ -200,6 +229,8 @@ CMakeFiles/raytracer.dir/src/cpu/main.o: \
  /usr/include/c++/13/pstl/execution_defs.h \
  /home/christianw/raytracer-cuda/include/raytracer/camera.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_list.h \
+ /home/christianw/raytracer-cuda/include/raytracer/camera_data.h \
+ /home/christianw/raytracer-cuda/include/raytracer/render.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_list.h \
  /home/christianw/raytracer-cuda/include/raytracer/material.h \

@@ -1,20 +1,23 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include "camera_data.h"
 #include "hittable.h"
 #include "hittable_list.h"
 #include "random_utils.h"
 #include "material.h"
 #include "hittable_dispatch_impl.h"
-#include "camera_data.h"
-#include "render.h"
+#include "render.h" // For render_kernel
 
-extern void launch_render_kernel(const camera_data*, const hittable*, color*);
+#include <cuda_runtime.h>
+#include <iostream>
+#include <vector>
 
 class camera {
   public:
     double aspect_ratio = 1.0;  // Ratio of image width over height
     int    image_width  = 100;  // Rendered image width in pixel count
+    int    image_height;   // Rendered image height
     int    samples_per_pixel = 10; // Count of random samples for each pixel
     int    max_depth         = 10;   // Maximum number of ray bounces into scene
     color  background;
@@ -26,69 +29,55 @@ class camera {
 
     double defocus_angle = 0;
     double focus_dist = 10;
-
-    void render_gpu(const hittable& world) {
+    
+    void render(const hittable& world) {
         initialize();
 
         int image_size = image_width * image_height;
-
-        // Allocate framebuffer
+    
+        // === Allocate framebuffer ===
         color* fb_device;
         cudaMalloc(&fb_device, image_size * sizeof(color));
-
-        // Copy camera data to GPU
+    
+        // === Copy camera data to GPU ===
         camera_data cam_data = get_camera_data();
         camera_data* cam_device;
         cudaMalloc(&cam_device, sizeof(camera_data));
         cudaMemcpy(cam_device, &cam_data, sizeof(camera_data), cudaMemcpyHostToDevice);
-
-        // Copy world to GPU
+    
+        // === Copy world to GPU ===
         hittable* world_device;
         cudaMalloc(&world_device, sizeof(hittable));
         cudaMemcpy(world_device, &world, sizeof(hittable), cudaMemcpyHostToDevice);
-
-        // Launch CUDA render kernal
-        launch_render_kernel(cam_device, world_device, fb_device);
-
-        // Copy framebuffer back
-        color* framebuffer = new color[image_size];
-        cudaMemcpy(framebuffer, fb_device, image_size * sizeof(color), cudaMemcpyDeviceToHost);
-
-        // Output Image
-        write_ppm(std::cout, framebuffer, image_height, image_width);
-        delete[] framebuffer;
-    }
-
-    void render(const hittable& world) {
-        initialize();
-
+    
+        // === Launch CUDA render kernel ===
+        dim3 threads_per_block(8, 8);
+        dim3 num_blocks(
+            (image_width + threads_per_block.x - 1) / threads_per_block.x,
+            (image_height + threads_per_block.y - 1) / threads_per_block.y
+        );
+    
+        render_kernel<<<num_blocks, threads_per_block>>>(*cam_device, world_device, fb_device);
+        cudaDeviceSynchronize();
+    
+        // === Copy framebuffer back ===
+        std::vector<color> fb_host(image_size);
+        cudaMemcpy(fb_host.data(), fb_device, image_size * sizeof(color), cudaMemcpyDeviceToHost);
+    
+        // === Output image ===
         std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
         for (int j = 0; j < image_height; j++) {
-            std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
             for (int i = 0; i < image_width; i++) {
-                color pixel_color(0, 0, 0);
-                for (int sample = 0; sample < samples_per_pixel; sample++) {
-                    ray r = get_ray(i, j);
-                    pixel_color += ray_color(r, max_depth, world);
-                }
-                write_color(std::cout, pixel_samples_scale * pixel_color);
+                int pixel_index = j * image_width + i;
+                write_color(std::cout, fb_host[pixel_index]);
             }
         }
-
-        std::clog << "\rDone.                 \n";
-    }
-
-  private:
-    int    image_height;   // Rendered image height
-    double pixel_samples_scale;  // Color scale factor for a sum of pixel samples
-    point3 center;         // Camera center
-    point3 pixel00_loc;    // Location of pixel 0, 0
-    vec3   pixel_delta_u;  // Offset to pixel to the right
-    vec3   pixel_delta_v;  // Offset to pixel below
-    vec3   u, v, w;
-    vec3   defocus_disk_u;
-    vec3   defocus_disk_v;
+    
+        // === Cleanup ===
+        cudaFree(fb_device);
+        cudaFree(cam_device);
+        cudaFree(world_device);
+    }    
 
     void initialize() {
         image_height = int(image_width / aspect_ratio);
@@ -126,56 +115,6 @@ class camera {
         defocus_disk_v = v * defocus_radius;
     }
 
-    ray get_ray(int i, int j) const {
-        // Construct a camera ray originating from the origin and directed at randomly sampled
-        // point around the pixel location i, j.
-
-        auto offset = sample_square();
-        auto pixel_sample = pixel00_loc
-                          + ((i + offset.x()) * pixel_delta_u)
-                          + ((j + offset.y()) * pixel_delta_v);
-
-        auto ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
-        auto ray_direction = pixel_sample - ray_origin;
-
-        return ray(ray_origin, ray_direction);
-    }
-
-    vec3 sample_square() const {
-        // Returns the vector to a random point in the [-.5,-.5]-[+.5,+.5] unit square.
-        return vec3(cpu_random_double() - 0.5, cpu_random_double() - 0.5, 0);
-    }
-
-    point3 defocus_disk_sample() const {
-        auto p = random_in_unit_disk_host();
-        return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
-    }
-
-    color ray_color(const ray& r, int depth, const hittable& world) const {
-        // If we've exceeded the ray bounce limit, no more light is gathered.
-        if (depth <= 0)
-            return color(0,0,0);
-
-        hit_record rec;
-        rec = hit_hittable(world, r, interval(0.001, infinity), rec);
-
-        if (!rec.hit) {
-            return background;
-        }
-
-        ray scattered;
-        color attenuation;
-        color color_from_emission = emitted_material(*rec.mat_ptr, rec.u, rec.v, rec.p);
-
-        if (!scatter_material_host(*rec.mat_ptr, r, rec, attenuation, scattered)) {
-            return color_from_emission;
-        }
-
-        color color_from_scatter = attenuation * ray_color(scattered, depth - 1, world);
-
-        return color_from_emission + color_from_scatter;
-    }
-
     camera_data get_camera_data() const {
         camera_data cam;
     
@@ -194,6 +133,17 @@ class camera {
     
         return cam;
     }
+    
+
+  private:
+    double pixel_samples_scale;  // Color scale factor for a sum of pixel samples
+    point3 center;         // Camera center
+    point3 pixel00_loc;    // Location of pixel 0, 0
+    vec3   pixel_delta_u;  // Offset to pixel to the right
+    vec3   pixel_delta_v;  // Offset to pixel below
+    vec3   u, v, w;
+    vec3   defocus_disk_u;
+    vec3   defocus_disk_v;
 };
 
 #endif
