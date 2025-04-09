@@ -7,11 +7,11 @@ CUDA_DEFINES =
 
 CUDA_INCLUDES = --options-file CMakeFiles/raytracer.dir/includes_CUDA.rsp
 
-CUDA_FLAGS = -std=c++14 "--generate-code=arch=compute_53,code=[compute_53,sm_53]"
+CUDA_FLAGS = -std=c++17 "--generate-code=arch=compute_53,code=[compute_53,sm_53]" --expt-relaxed-constexpr
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/christianw/raytracer-cuda/include -I/usr/local/cuda/include
+CXX_INCLUDES = -I/home/christianw/raytracer-cuda/include
 
-CXX_FLAGS = 
+CXX_FLAGS = -std=gnu++17
 

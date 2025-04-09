@@ -42,10 +42,6 @@ class camera {
         cudaMalloc(&cam_device, sizeof(camera_data));
         cudaMemcpy(cam_device, &cam_data, sizeof(camera_data), cudaMemcpyHostToDevice);
 
-        std::cout << "Getting here then crashing" << std::endl;
-
-        std::cout << "Root hittable type: " << (int)d_world->type << std::endl;
-
         // Copy world to GPU
         // hittable* world_device;
         // cudaMalloc(&world_device, sizeof(hittable));
