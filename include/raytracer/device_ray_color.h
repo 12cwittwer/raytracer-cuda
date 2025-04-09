@@ -15,6 +15,11 @@ __device__ color ray_color(
     if (depth <= 0)
         return color(0, 0, 0);
 
+    if (depth == 1) {
+        printf("ray_color depth 1, origin=(%.2f,%.2f,%.2f)\n",
+                r.origin().x(), r.origin().y(), r.origin().z());
+    }
+
     hit_record rec;
     interval t_range(0.001, infinity);
     rec = hit_hittable(*world, r, t_range, rec);
