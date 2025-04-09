@@ -42,6 +42,13 @@ class camera {
         cudaMalloc(&cam_device, sizeof(camera_data));
         cudaMemcpy(cam_device, &cam_data, sizeof(camera_data), cudaMemcpyHostToDevice);
 
+        std::cout << "Root hittable type: " << (int)world.type << std::endl;
+
+        if (world.type == hittable_type::bvh_node) {
+            bvh_node* node = static_cast<bvh_node*>(world.data);
+            std::cout << "  BVH left type: " << (int)node->left.type << std::endl;
+        }
+
         // Copy world to GPU
         hittable* world_device;
         cudaMalloc(&world_device, sizeof(hittable));
