@@ -29,7 +29,7 @@ __global__ void render_kernel(
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (threadIdx.x == 0 && threadIdx.y == 0 && blockIdx.x == 0 && blockIdx.y == 0) {
+    if (x == 0 && y == 0) {
         printf("Kernel launched\n");
     }
 
@@ -55,5 +55,9 @@ void launch_render_kernel(const camera_data* cam, const hittable* world, color* 
         (image_height + threads_per_block.y - 1) / threads_per_block.y
     );
     render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        printf("CUDA Launch Error: %s\n", cudaGetErrorString(err));
+    }
     cudaDeviceSynchronize();
 }
