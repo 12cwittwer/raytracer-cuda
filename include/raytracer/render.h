@@ -18,7 +18,7 @@ __global__ void render_kernel(
 extern "C" {
 #endif
 
-void launch_render_kernel(const camera_data* cam, const hittable* world, color* fb);
+void launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height);
 
 #ifdef __cplusplus
 }

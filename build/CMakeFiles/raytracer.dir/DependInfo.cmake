@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/christianw/raytracer-cuda/src/gpu/render.cu" "CMakeFiles/raytracer.dir/src/gpu/render.o" "gcc" "CMakeFiles/raytracer.dir/src/gpu/render.o.d"
-  "/home/christianw/raytracer-cuda/src/cpu/main.cpp" "CMakeFiles/raytracer.dir/src/cpu/main.o" "gcc" "CMakeFiles/raytracer.dir/src/cpu/main.o.d"
+  "/home/christianw/raytracer-cuda/src/gpu/render.cu" "CMakeFiles/raytracer.dir/src/gpu/render.cu.o" "gcc" "CMakeFiles/raytracer.dir/src/gpu/render.cu.o.d"
+  "/home/christianw/raytracer-cuda/src/cpu/main.cpp" "CMakeFiles/raytracer.dir/src/cpu/main.cpp.o" "gcc" "CMakeFiles/raytracer.dir/src/cpu/main.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

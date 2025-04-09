@@ -9,6 +9,107 @@
 #include "raytracer/sphere_gpu.h"
 #include "raytracer/instances.h"
 
+hittable* copy_scene_to_gpu(
+    lambertian* lambertians, int lambertian_count,
+    diffuse_light* lights, int light_count,
+    material* materials, int material_count,
+    gpu_sphere* spheres, int sphere_count,
+    quad* quads, int quad_count,
+    hittable* objects, int object_count,
+    bvh_node* nodes, int node_count,
+    int root_index
+) {
+    // === Copy base arrays ===
+    lambertian* d_lambertians;
+    cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
+    cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice);
+
+    diffuse_light* d_lights;
+    cudaMalloc(&d_lights, light_count * sizeof(diffuse_light));
+    cudaMemcpy(d_lights, lights, light_count * sizeof(diffuse_light), cudaMemcpyHostToDevice);
+
+    material* d_materials;
+    cudaMalloc(&d_materials, material_count * sizeof(material));
+
+    gpu_sphere* d_spheres;
+    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
+
+    quad* d_quads;
+    cudaMalloc(&d_quads, quad_count * sizeof(quad));
+
+    hittable* d_objects;
+    cudaMalloc(&d_objects, object_count * sizeof(hittable));
+
+    bvh_node* d_nodes;
+    cudaMalloc(&d_nodes, node_count * sizeof(bvh_node));
+    cudaMemcpy(d_nodes, nodes, node_count * sizeof(bvh_node), cudaMemcpyHostToDevice);
+
+    // === Fix materials (internal data pointers) ===
+    material* fixed_materials = new material[material_count];
+    for (int i = 0; i < material_count; ++i) {
+        fixed_materials[i] = materials[i];
+        switch (fixed_materials[i].type) {
+            case material_type::lambertian:
+                fixed_materials[i].data = &d_lambertians[
+                    static_cast<lambertian*>(materials[i].data) - lambertians];
+                break;
+            case material_type::diffuse_light:
+                fixed_materials[i].data = &d_lights[
+                    static_cast<diffuse_light*>(materials[i].data) - lights];
+                break;
+            // Add other material types here if needed
+        }
+    }
+    cudaMemcpy(d_materials, fixed_materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
+    delete[] fixed_materials;
+
+    // === Fix gpu_sphere mat_ptrs ===
+    gpu_sphere* fixed_spheres = new gpu_sphere[sphere_count];
+    for (int i = 0; i < sphere_count; ++i) {
+        fixed_spheres[i] = spheres[i];
+        fixed_spheres[i].mat_ptr = &d_materials[spheres[i].mat_ptr - materials];
+    }
+    cudaMemcpy(d_spheres, fixed_spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
+    delete[] fixed_spheres;
+
+    // === Fix quad mat_ptrs ===
+    quad* fixed_quads = new quad[quad_count];
+    for (int i = 0; i < quad_count; ++i) {
+        fixed_quads[i] = quads[i];
+        fixed_quads[i].mat_ptr = &d_materials[quads[i].mat_ptr - materials];
+    }
+    cudaMemcpy(d_quads, fixed_quads, quad_count * sizeof(quad), cudaMemcpyHostToDevice);
+    delete[] fixed_quads;
+
+    // === Fix hittable ptrs ===
+    hittable* fixed_objects = new hittable[object_count];
+    for (int i = 0; i < object_count; ++i) {
+        fixed_objects[i] = objects[i];
+        switch (fixed_objects[i].type) {
+            case hittable_type::sphere:
+                fixed_objects[i].data = &d_spheres[
+                    static_cast<gpu_sphere*>(objects[i].data) - spheres];
+                break;
+            case hittable_type::quad:
+                fixed_objects[i].data = &d_quads[
+                    static_cast<quad*>(objects[i].data) - quads];
+                break;
+            // Add other hittable types if needed
+        }
+    }
+    cudaMemcpy(d_objects, fixed_objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
+    delete[] fixed_objects;
+
+    // === Build and return the top-level world pointer ===
+    hittable world_gpu = { hittable_type::bvh_node, &d_nodes[root_index] };
+    hittable* d_world;
+    cudaMalloc(&d_world, sizeof(hittable));
+    cudaMemcpy(d_world, &world_gpu, sizeof(hittable), cudaMemcpyHostToDevice);
+
+    return d_world;
+}
+
+
 inline void create_box(
     const point3& a,
     const point3& b,
@@ -855,12 +956,162 @@ void final_scene() {
 }
 
 void my_scene() {
+    // === Material storage ===
+    lambertian* lambertians = new lambertian[3];
+    diffuse_light* lights   = new diffuse_light[1];
+    material* materials     = new material[3 + 1];  // 3 objects + 1 light
+    gpu_sphere* spheres     = new gpu_sphere[2];
+    hittable* objects       = new hittable[3];
 
+    int lambertian_count = 0;
+    int light_count = 0;
+    int material_count = 0;
+    int object_count = 0;
+
+    // === Ground ===
+    lambertians[lambertian_count++] = { color(0.4, 0.4, 0.4) };
+    materials[material_count++] = { material_type::lambertian, &lambertians[lambertian_count - 1] };
+    spheres[object_count] = { point3(0, -1000, 0), 1000.0, &materials[material_count - 1] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[object_count - 1] };
+
+    // === Small Sphere ===
+    lambertians[lambertian_count++] = { color(0.7, 0.2, 0.2) };
+    materials[material_count++] = { material_type::lambertian, &lambertians[lambertian_count - 1] };
+    spheres[object_count] = { point3(0, 2, 0), 2.0, &materials[material_count - 1] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[object_count - 1] };
+
+    // === Diffuse Light ===
+    lights[light_count++] = { color(4, 4, 4) };
+    materials[material_count++] = { material_type::diffuse_light, &lights[light_count - 1] };
+
+    // === Quad ===
+    quad* quads = new quad[1];
+    quads[0] = quad(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), &materials[material_count - 1]);
+    objects[object_count++] = { hittable_type::quad, &quads[0] };
+
+    // === BVH ===
+    bvh_node* nodes = new bvh_node[2 * object_count];
+    int node_index = 0;
+    int root_index = build_bvh(objects, 0, object_count, nodes, node_index);
+    hittable world = { hittable_type::bvh_node, &nodes[root_index] };
+
+    // === Camera Setup ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+    cam.background = color(0, 0, 0);
+
+    cam.vfov = 20;
+    cam.lookfrom = point3(26, 3, 6);
+    cam.lookat   = point3(0, 2, 0);
+    cam.vup      = vec3(0, 1, 0);
+
+    cam.defocus_angle = 0;
+
+    // === Allocate device memory ===
+    lambertian* d_lambertians;
+    cudaMalloc(&d_lambertians, 3 * sizeof(lambertian));
+    cudaMemcpy(d_lambertians, lambertians, 3 * sizeof(lambertian), cudaMemcpyHostToDevice);
+
+    diffuse_light* d_lights;
+    cudaMalloc(&d_lights, 1 * sizeof(diffuse_light));
+    cudaMemcpy(d_lights, lights, 1 * sizeof(diffuse_light), cudaMemcpyHostToDevice);
+
+    material* d_materials;
+    cudaMalloc(&d_materials, 4 * sizeof(material));
+    // We'll fix material pointers below
+
+    gpu_sphere* d_spheres;
+    cudaMalloc(&d_spheres, 2 * sizeof(gpu_sphere));
+    // We'll fix mat_ptr fields below
+
+    quad* d_quads;
+    cudaMalloc(&d_quads, 1 * sizeof(quad));
+    // Will also fix mat_ptr
+
+    hittable* d_objects;
+    cudaMalloc(&d_objects, 3 * sizeof(hittable));
+    // Will fix pointers inside
+
+    bvh_node* d_nodes;
+    cudaMalloc(&d_nodes, 2 * object_count * sizeof(bvh_node));
+    cudaMemcpy(d_nodes, nodes, 2 * object_count * sizeof(bvh_node), cudaMemcpyHostToDevice);
+
+    material fixed_materials[4];
+    for (int i = 0; i < material_count; ++i) {
+        fixed_materials[i] = materials[i];
+
+        switch (fixed_materials[i].type) {
+            case material_type::lambertian:
+                fixed_materials[i].data = &d_lambertians[
+                    static_cast<lambertian*>(materials[i].data) - lambertians];
+                break;
+
+            case material_type::diffuse_light:
+                fixed_materials[i].data = &d_lights[
+                    static_cast<diffuse_light*>(materials[i].data) - lights];
+                break;
+
+            // Add other material types as needed
+        }
+    }
+    cudaMemcpy(d_materials, fixed_materials, 4 * sizeof(material), cudaMemcpyHostToDevice);
+
+
+    gpu_sphere fixed_spheres[2];
+    for (int i = 0; i < 2; ++i) {
+        fixed_spheres[i] = spheres[i];
+        fixed_spheres[i].mat_ptr = &d_materials[spheres[i].mat_ptr - materials];
+    }
+    cudaMemcpy(d_spheres, fixed_spheres, 2 * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
+
+    quad fixed_quads[1];
+    fixed_quads[0] = quads[0];
+    fixed_quads[0].mat_ptr = &d_materials[quads[0].mat_ptr - materials];
+    cudaMemcpy(d_quads, fixed_quads, sizeof(quad), cudaMemcpyHostToDevice);
+
+    hittable fixed_objects[3];
+    for (int i = 0; i < object_count; ++i) {
+        fixed_objects[i] = objects[i];
+        switch (fixed_objects[i].type) {
+            case hittable_type::sphere:
+                fixed_objects[i].data = &d_spheres[
+                    static_cast<gpu_sphere*>(objects[i].data) - spheres];
+                break;
+
+            case hittable_type::quad:
+                fixed_objects[i].data = &d_quads[
+                    static_cast<quad*>(objects[i].data) - quads];
+                break;
+
+            // add more if needed
+        }
+    }
+    cudaMemcpy(d_objects, fixed_objects, 3 * sizeof(hittable), cudaMemcpyHostToDevice);
+
+    hittable root_device = { hittable_type::bvh_node, &d_nodes[root_index] };
+
+    hittable* d_world;
+    cudaMalloc(&d_world, sizeof(hittable));
+    cudaMemcpy(d_world, &root_device, sizeof(hittable), cudaMemcpyHostToDevice);
+
+
+    cam.render_gpu(*d_world);  // or just update render_gpu to accept `hittable*`
+
+    // Cleanup
+    delete[] lambertians;
+    delete[] lights;
+    delete[] materials;
+    delete[] spheres;
+    delete[] quads;
+    delete[] objects;
 }
 
 
 int main() {
-    switch (1) {
+    switch (9) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;

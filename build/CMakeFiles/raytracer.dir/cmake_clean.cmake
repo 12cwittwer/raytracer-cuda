@@ -1,9 +1,9 @@
 file(REMOVE_RECURSE
   "CMakeFiles/raytracer.dir/cmake_device_link.o"
-  "CMakeFiles/raytracer.dir/src/cpu/main.o"
-  "CMakeFiles/raytracer.dir/src/cpu/main.o.d"
-  "CMakeFiles/raytracer.dir/src/gpu/render.o"
-  "CMakeFiles/raytracer.dir/src/gpu/render.o.d"
+  "CMakeFiles/raytracer.dir/src/cpu/main.cpp.o"
+  "CMakeFiles/raytracer.dir/src/cpu/main.cpp.o.d"
+  "CMakeFiles/raytracer.dir/src/gpu/render.cu.o"
+  "CMakeFiles/raytracer.dir/src/gpu/render.cu.o.d"
   "raytracer"
   "raytracer.pdb"
 )

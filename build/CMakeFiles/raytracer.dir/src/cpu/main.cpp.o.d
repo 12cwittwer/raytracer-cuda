@@ -1,4 +1,4 @@
-CMakeFiles/raytracer.dir/src/cpu/main.o: \
+CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: \
  /home/christianw/raytracer-cuda/src/cpu/main.cpp \
  /usr/include/stdc-predef.h /usr/include/c++/13/iostream \
  /usr/include/c++/13/bits/requires_hosted.h \

@@ -129,35 +129,53 @@ raytracer/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/build
 .PHONY : raytracer/fast
 
-# target to build an object file
-src/cpu/main.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/cpu/main.o
+src/cpu/main.o: src/cpu/main.cpp.o
 .PHONY : src/cpu/main.o
 
-# target to preprocess a source file
-src/cpu/main.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/cpu/main.i
+# target to build an object file
+src/cpu/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/cpu/main.cpp.o
+.PHONY : src/cpu/main.cpp.o
+
+src/cpu/main.i: src/cpu/main.cpp.i
 .PHONY : src/cpu/main.i
 
-# target to generate assembly for a file
-src/cpu/main.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/cpu/main.s
+# target to preprocess a source file
+src/cpu/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/cpu/main.cpp.i
+.PHONY : src/cpu/main.cpp.i
+
+src/cpu/main.s: src/cpu/main.cpp.s
 .PHONY : src/cpu/main.s
 
-# target to build an object file
-src/gpu/render.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/gpu/render.o
+# target to generate assembly for a file
+src/cpu/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/cpu/main.cpp.s
+.PHONY : src/cpu/main.cpp.s
+
+src/gpu/render.o: src/gpu/render.cu.o
 .PHONY : src/gpu/render.o
 
-# target to preprocess a source file
-src/gpu/render.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/gpu/render.i
+# target to build an object file
+src/gpu/render.cu.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/gpu/render.cu.o
+.PHONY : src/gpu/render.cu.o
+
+src/gpu/render.i: src/gpu/render.cu.i
 .PHONY : src/gpu/render.i
 
-# target to generate assembly for a file
-src/gpu/render.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/gpu/render.s
+# target to preprocess a source file
+src/gpu/render.cu.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/gpu/render.cu.i
+.PHONY : src/gpu/render.cu.i
+
+src/gpu/render.s: src/gpu/render.cu.s
 .PHONY : src/gpu/render.s
+
+# target to generate assembly for a file
+src/gpu/render.cu.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/raytracer.dir/build.make CMakeFiles/raytracer.dir/src/gpu/render.cu.s
+.PHONY : src/gpu/render.cu.s
 
 # Help Target
 help:

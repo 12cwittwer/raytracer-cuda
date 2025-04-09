@@ -9,7 +9,7 @@
 #include "camera_data.h"
 #include "render.h"
 
-extern void launch_render_kernel(const camera_data*, const hittable*, color*);
+extern void launch_render_kernel(const camera_data*, const hittable*, color*, int, int);
 
 class camera {
   public:
@@ -48,7 +48,7 @@ class camera {
         cudaMemcpy(world_device, &world, sizeof(hittable), cudaMemcpyHostToDevice);
 
         // Launch CUDA render kernal
-        launch_render_kernel(cam_device, world_device, fb_device);
+        launch_render_kernel(cam_device, world_device, fb_device, image_width, image_height);
 
         // Copy framebuffer back
         color* framebuffer = new color[image_size];
