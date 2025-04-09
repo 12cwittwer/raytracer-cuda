@@ -299,7 +299,7 @@ void spheres() {
     cam.focus_dist    = 10.0;
 
     // === Render ===
-    cam.render_gpu(root); // <- Pass BVH root hittable
+    cam.render_gpu(&root); // <- Pass BVH root hittable
 
     // === Clean up ===
     delete[] lambertians;
@@ -1098,7 +1098,7 @@ void my_scene() {
     cudaMemcpy(d_world, &root_device, sizeof(hittable), cudaMemcpyHostToDevice);
 
 
-    cam.render_gpu(*d_world);  // or just update render_gpu to accept `hittable*`
+    cam.render_gpu(d_world);  // or just update render_gpu to accept `hittable*`
 
     // Cleanup
     delete[] lambertians;

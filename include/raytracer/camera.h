@@ -27,7 +27,7 @@ class camera {
     double defocus_angle = 0;
     double focus_dist = 10;
 
-    void render_gpu(const hittable& world) {
+    void render_gpu(const hittable* d_world) {
         initialize();
 
         int image_size = image_width * image_height;
@@ -42,20 +42,17 @@ class camera {
         cudaMalloc(&cam_device, sizeof(camera_data));
         cudaMemcpy(cam_device, &cam_data, sizeof(camera_data), cudaMemcpyHostToDevice);
 
-        std::cout << "Root hittable type: " << (int)world.type << std::endl;
+        std::cout << "Getting here then crashing" << std::endl;
 
-        if (world.type == hittable_type::bvh_node) {
-            bvh_node* node = static_cast<bvh_node*>(world.data);
-            std::cout << "  BVH left type: " << (int)node->left.type << std::endl;
-        }
+        std::cout << "Root hittable type: " << (int)d_world->type << std::endl;
 
         // Copy world to GPU
-        hittable* world_device;
-        cudaMalloc(&world_device, sizeof(hittable));
-        cudaMemcpy(world_device, &world, sizeof(hittable), cudaMemcpyHostToDevice);
+        // hittable* world_device;
+        // cudaMalloc(&world_device, sizeof(hittable));
+        // cudaMemcpy(world_device, &world, sizeof(hittable), cudaMemcpyHostToDevice);
 
         // Launch CUDA render kernal
-        launch_render_kernel(cam_device, world_device, fb_device, image_width, image_height);
+        launch_render_kernel(cam_device, d_world, fb_device, image_width, image_height);
 
         // Copy framebuffer back
         color* framebuffer = new color[image_size];
