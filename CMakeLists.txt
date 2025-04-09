@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.18)
 
 project(raytracer LANGUAGES CXX CUDA)
 
+find_package(CUDA REQUIRED)
+
+include_directories(
+    ${CUDA_INCLUDE_DIRS}
+)
+
+
 # Enable C++17 for both C++ and CUDA
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
