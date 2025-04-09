@@ -36,7 +36,7 @@ __global__ void render_kernel(
     if (x >= cam->image_width || y >= cam->image_height) return;
 
     if (x == 0 && y == 0) {
-        printf("Failed to read camera dimesions");
+        printf("Camera Dimensions Width: %d Height: %d", cam->image_width, cam->image_height);
     }
 
     int pixel_index = y * cam->image_width + x;
