@@ -8,7 +8,7 @@
 
 // CUDA kernel
 __global__ void render_kernel(
-    const camera_data cam,
+    const camera_data* cam,
     const hittable* world,
     color* framebuffer
 );
