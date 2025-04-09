@@ -20,9 +20,12 @@ __device__ color ray_color(
         
     hit_record rec;
     interval t_range(0.001, infinity);
+    if (depth == 49) {
+        printf("Calling hit_hittable, world type=%d\n", world->type);
+    }
     rec = hit_hittable(*world, r, t_range, rec);
-    if (depth == 49 && rec.hit) {
-        printf("hit at t=%.2f, mat type=%d, mat_ptr=%p\n", rec.t, (int)rec.mat_ptr->type, rec.mat_ptr->data);
+    if (depth == 49) {
+        printf("Returned from hit_hittable: hit=%d\n", rec.hit);
     }
     if (!rec.hit)
         return background;
