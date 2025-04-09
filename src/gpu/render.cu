@@ -29,10 +29,8 @@ __global__ void render_kernel(
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
 
-    if (threadIdx.x == 0 && blockIdx.x == 0 && blockIdx.y == 0) {
-        printf("image size = %d x %d\n", cam->image_width, cam->image_height);
-        printf("samples = %d, depth = %d\n", cam->samples_per_pixel, cam->max_depth);
-        printf("world = %p, world->type = %d\n", world, world->type);
+    if (threadIdx.x == 0 && threadIdx.y == 0 && blockIdx.x == 0 && blockIdx.y == 0) {
+        printf("Kernel launched\n");
     }
 
     if (x >= cam->image_width || y >= cam->image_height) return;
