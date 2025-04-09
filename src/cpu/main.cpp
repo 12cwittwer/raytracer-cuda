@@ -1001,7 +1001,7 @@ void my_scene() {
     cam.image_width = 400;
     cam.samples_per_pixel = 100;
     cam.max_depth = 50;
-    cam.background = color(0, 0, 0);
+    cam.background = color(20, 20, 20);
 
     cam.vfov = 20;
     cam.lookfrom = point3(26, 3, 6);
