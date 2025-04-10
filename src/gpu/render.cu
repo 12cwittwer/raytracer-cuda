@@ -44,12 +44,11 @@ __global__ void render_kernel(
         printf("World data is %p\n", world->data);
     }
 
-    printf("World first hittable is %d\n", (int)world->type);
-    printf("World data is %p\n", world->data);
-
     int pixel_index = y * cam->image_width + x;
     curandState rng;
     curand_init(1984 + pixel_index, 0, 0, &rng);
+
+    printf("Getting past random");
 
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
