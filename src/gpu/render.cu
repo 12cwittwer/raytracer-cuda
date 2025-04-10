@@ -44,6 +44,8 @@ __global__ void render_kernel(
         printf("World data is %p\n", world->data);
     }
 
+    printf("Do they all crash\n");
+
     int pixel_index = y * cam->image_width + x;
     curandState rng;
     curand_init(1984 + pixel_index, 0, 0, &rng);

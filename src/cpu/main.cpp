@@ -1130,7 +1130,7 @@ void smoll_boi() {
     cam.defocus_angle = 0;
 
     // === Render ===
-    cam.render(d_objects);
+    cam.render_gpu(d_objects);
 }
 
 int main() {
