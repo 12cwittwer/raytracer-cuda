@@ -47,7 +47,9 @@ struct quad {
 __host__ __device__ inline hit_record hit_quad(
     const quad& quad, const ray& r, interval ray_t, hit_record rec
 ) {
-
+    if (quad.mat_ptr == nullptr) {
+        printf("Quad material pointer is null");
+    }
     auto denom = dot(quad.normal, r.direction());
     if (fabs(denom) < 1e-8)
         return rec;
