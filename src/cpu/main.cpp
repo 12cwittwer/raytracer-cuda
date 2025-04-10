@@ -15,10 +15,14 @@ hittable* copy_scene_to_gpu(
     material* materials, int material_count,
     gpu_sphere* spheres, int sphere_count,
     quad* quads, int quad_count,
+    translate* translates, int translate_count,
+    rotate_y* rotates, int rotate_count,
+    gpu_hittable_list* lists, int list_count,
     hittable* objects, int object_count,
     bvh_node* nodes, int node_count,
     int root_index
-) {
+)
+ {
     // === Copy base arrays ===
     lambertian* d_lambertians;
     cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
@@ -36,6 +40,18 @@ hittable* copy_scene_to_gpu(
 
     quad* d_quads;
     cudaMalloc(&d_quads, quad_count * sizeof(quad));
+
+    translate* d_translates;
+    cudaMalloc(&d_translates, translate_count * sizeof(translate));
+    cudaMemcpy(d_translates, translates, translate_count * sizeof(translate), cudaMemcpyHostToDevice);
+    
+    rotate_y* d_rotates;
+    cudaMalloc(&d_rotates, rotate_count * sizeof(rotate_y));
+    cudaMemcpy(d_rotates, rotates, rotate_count * sizeof(rotate_y), cudaMemcpyHostToDevice);
+    
+    gpu_hittable_list* d_lists;
+    cudaMalloc(&d_lists, list_count * sizeof(gpu_hittable_list));
+    cudaMemcpy(d_lists, lists, list_count * sizeof(gpu_hittable_list), cudaMemcpyHostToDevice);
 
     hittable* d_objects;
     cudaMalloc(&d_objects, object_count * sizeof(hittable));
@@ -58,6 +74,18 @@ hittable* copy_scene_to_gpu(
             case hittable_type::bvh_node:
                 fixed_nodes[i].left.data = &d_nodes[
                     static_cast<bvh_node*>(nodes[i].left.data) - nodes];
+                break;
+            case hittable_type::translate:
+                fixed_nodes[i].left.data = &d_translates[
+                    static_cast<translate*>(nodes[i].left.data) - translates];
+                break;
+            case hittable_type::rotate_y:
+                fixed_nodes[i].left.data = &d_rotates[
+                    static_cast<rotate_y*>(nodes[i].left.data) - rotates];
+                break;
+            case hittable_type::hittable_list:
+                fixed_nodes[i].left.data = &d_lists[
+                    static_cast<gpu_hittable_list*>(nodes[i].left.data) - lists];
                 break;
             default:
                 printf("BVH left.type=%d unhandled in copy_scene_to_gpu!\n", (int)fixed_nodes[i].left.type);
@@ -82,9 +110,21 @@ hittable* copy_scene_to_gpu(
                 fixed_nodes[i].right.data = &d_nodes[
                     static_cast<bvh_node*>(nodes[i].right.data) - nodes];
                 break;
+            case hittable_type::translate:
+                fixed_nodes[i].right.data = &d_translates[
+                    static_cast<translate*>(nodes[i].right.data) - translates];
+                break;
+            case hittable_type::rotate_y:
+                fixed_nodes[i].right.data = &d_rotates[
+                    static_cast<rotate_y*>(nodes[i].right.data) - rotates];
+                break;
+            case hittable_type::hittable_list:
+                fixed_nodes[i].right.data = &d_lists[
+                    static_cast<gpu_hittable_list*>(nodes[i].right.data) - lists];
+                break;
             default:
-                printf("BVH left.type=%d unhandled in copy_scene_to_gpu!\n", (int)fixed_nodes[i].left.type);
-                fixed_nodes[i].left.data = nullptr; // crash safe but visible
+                printf("BVH right.type=%d unhandled in copy_scene_to_gpu!\n", (int)fixed_nodes[i].right.type);
+                fixed_nodes[i].right.data = nullptr; // crash safe but visible
                 break;
         }
         if (fixed_nodes[i].right.data == nullptr) {
@@ -1008,44 +1048,60 @@ void final_scene() {
 }
 
 void my_scene() {
-    // === Material storage ===
-    lambertian* lambertians = new lambertian[3];
-    diffuse_light* lights   = new diffuse_light[1];
-    material* materials     = new material[3 + 1];  // 3 objects + 1 light
-    gpu_sphere* spheres     = new gpu_sphere[2];
-    hittable* objects       = new hittable[3];
+    // === Allocate storage capacities ===
+    const int max_lambertians = 3;
+    const int max_lights = 1;
+    const int max_materials = max_lambertians + max_lights;
+    const int max_spheres = 2;
+    const int max_quads = 1;
+    const int max_objects = max_spheres + max_quads;
+    const int max_nodes = 2 * max_objects; // BVH upper bound
+    const int max_translates = 0;  // none used
+    const int max_rotates = 0;     // none used
+    const int max_lists = 0;       // none used
+
+    // === Host-side arrays ===
+    lambertian* lambertians = new lambertian[max_lambertians];
+    diffuse_light* lights = new diffuse_light[max_lights];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    quad* quads = new quad[max_quads];
+    hittable* objects = new hittable[max_objects];
+    bvh_node* nodes = new bvh_node[max_nodes];
+
+    // Optional for future support:
+    translate* translates = nullptr;
+    rotate_y* rotates = nullptr;
+    gpu_hittable_list* lists = nullptr;
 
     int lambertian_count = 0;
     int light_count = 0;
     int material_count = 0;
+    int sphere_count = 0;
+    int quad_count = 0;
     int object_count = 0;
 
-    // === Ground ===
+    // === Ground Sphere ===
     lambertians[lambertian_count++] = { color(0.4, 0.4, 0.4) };
     materials[material_count++] = { material_type::lambertian, &lambertians[lambertian_count - 1] };
-    spheres[object_count] = { point3(0, -1000, 0), 1000.0, &materials[material_count - 1] };
-    objects[object_count++] = { hittable_type::sphere, &spheres[object_count - 1] };
+    spheres[sphere_count] = { point3(0, -1000, 0), 1000.0, &materials[material_count - 1] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
 
     // === Small Sphere ===
     lambertians[lambertian_count++] = { color(0.7, 0.2, 0.2) };
     materials[material_count++] = { material_type::lambertian, &lambertians[lambertian_count - 1] };
-    spheres[object_count] = { point3(0, 2, 0), 2.0, &materials[material_count - 1] };
-    objects[object_count++] = { hittable_type::sphere, &spheres[object_count - 1] };
+    spheres[sphere_count] = { point3(0, 2, 0), 2.0, &materials[material_count - 1] };
+    objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
 
-    // === Diffuse Light ===
+    // === Diffuse Light Quad ===
     lights[light_count++] = { color(4, 4, 4) };
     materials[material_count++] = { material_type::diffuse_light, &lights[light_count - 1] };
+    quads[quad_count] = { point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), &materials[material_count - 1] };
+    objects[object_count++] = { hittable_type::quad, &quads[quad_count++] };
 
-    // === Quad ===
-    quad* quads = new quad[1];
-    quads[0] = quad(point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), &materials[material_count - 1]);
-    objects[object_count++] = { hittable_type::quad, &quads[0] };
-
-    // === BVH ===
-    bvh_node* nodes = new bvh_node[2 * object_count];
+    // === BVH Construction ===
     int node_index = 0;
     int root_index = build_bvh(objects, 0, object_count, nodes, node_index);
-    hittable world = { hittable_type::bvh_node, &nodes[root_index] };
 
     // === Camera Setup ===
     camera cam;
@@ -1057,34 +1113,37 @@ void my_scene() {
 
     cam.vfov = 20;
     cam.lookfrom = point3(26, 3, 6);
-    cam.lookat   = point3(0, 2, 0);
-    cam.vup      = vec3(0, 1, 0);
-
+    cam.lookat = point3(0, 2, 0);
+    cam.vup = vec3(0, 1, 0);
     cam.defocus_angle = 0;
 
+    // === Upload scene to GPU ===
     hittable* d_world = copy_scene_to_gpu(
         lambertians, lambertian_count,
         lights, light_count,
         materials, material_count,
-        spheres, object_count,         // <- use object_count for sphere_count
-        quads, 1,                      // <- you only created 1 quad
+        spheres, sphere_count,
+        quads, quad_count,
+        translates, max_translates,
+        rotates, max_rotates,
+        lists, max_lists,
         objects, object_count,
-        nodes, 2 * object_count,
+        nodes, node_index,  // node_index == # nodes created
         root_index
     );
-    
 
+    cam.render_gpu(d_world);
 
-    cam.render_gpu(d_world);  // or just update render_gpu to accept `hittable*`
-
-    // Cleanup
+    // === Cleanup ===
     delete[] lambertians;
     delete[] lights;
     delete[] materials;
     delete[] spheres;
     delete[] quads;
     delete[] objects;
+    delete[] nodes;
 }
+
 
 
 int main() {

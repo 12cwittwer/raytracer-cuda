@@ -15,8 +15,10 @@ __device__ color ray_color(
     if (depth <= 0)
         return color(0, 0, 0);
 
-    if (depth < 50)
-        printf("I made it to %d\n", depth);
+    if (depth == 48) {
+        printf("ray_color at depth 48: origin=(%.2f,%.2f,%.2f)\n",
+                r.origin().x(), r.origin().y(), r.origin().z());
+    }
         
     hit_record rec;
     interval t_range(0.001, infinity);

@@ -26,6 +26,9 @@ struct bvh_node {
             rec.hit = false;
             return rec;
         }
+        printf("bvh_node hit: left.type=%d right.type=%d\n",
+            (int)left.type, (int)right.type);
+     
         if (!bbox.hit(r, ray_t)) return rec;
 
         hit_record left_rec = hit_hittable(left, r, ray_t, rec);
