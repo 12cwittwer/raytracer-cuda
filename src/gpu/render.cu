@@ -82,6 +82,7 @@ void launch_render_kernel(const camera_data* cam, const hittable* world, color* 
 
     // Launch kernel
     // Try rendering the first pixel
+    printf("Launching kernel\n")
     render_kernel<<<1, 1>>>(cam, world, fb);
     render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
 
