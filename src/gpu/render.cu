@@ -54,6 +54,10 @@ __global__ void render_kernel(
         printf("Camera Dimensions Width: %d Height: %d\n", cam->image_width, cam->image_height);
     }
 
+    if (x == 0 && y == 0 && world->data == nullptr) {
+        printf("ERROR: world->data is nullptr!\n");
+    }
+
     if (x == 0 && y == 0) {
         printf("First hittable is %d\n", (int)world->type);
         printf("World data is %p\n", world->data);
@@ -66,6 +70,10 @@ __global__ void render_kernel(
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
         ray r = get_ray(cam, x, y, &rng);
+        if (world->data == nullptr) {
+            if (x == 0 && y == 0) printf("CRASH PREVENTED: world->data was null\n");
+            return;
+        }
         pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
     }
 
