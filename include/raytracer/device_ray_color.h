@@ -27,9 +27,7 @@ __device__ color ray_color(
     ray scattered;
     color attenuation;
     color emitted = emitted_material(*rec.mat_ptr, rec.u, rec.v, rec.p);
-    if (depth == 49) {
-        printf("Scattering material type=%d\n", (int)rec.mat_ptr->type);
-    }
+
     if (!scatter_material(*rec.mat_ptr, r, rec, attenuation, scattered, &rng))
         return emitted;
 

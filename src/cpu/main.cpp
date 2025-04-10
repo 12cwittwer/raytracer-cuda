@@ -11,106 +11,119 @@
 
 #include "raytracer/cuda_utils.h"  // for CUDA_CHECK
 
-template <typename T>
-T* upload_array_to_gpu(const T* host_array, int count) {
-    if (count == 0) return nullptr;
-    T* device_array;
-    CUDA_CHECK(cudaMalloc(&device_array, count * sizeof(T)));
-    CUDA_CHECK(cudaMemcpy(device_array, host_array, count * sizeof(T), cudaMemcpyHostToDevice));
-    return device_array;
-}
 
-hittable* copy_scene_to_gpu(
-    lambertian* lambertians, int lambertian_count,
-    diffuse_light* lights, int light_count,
-    material* materials, int material_count,
-    gpu_sphere* spheres, int sphere_count,
-    quad* quads, int quad_count,
-    translate* translates, int translate_count,
-    rotate_y* rotates, int rotate_count,
-    gpu_hittable_list* lists, int list_count,
-    hittable* objects, int object_count,
-    bvh_node* nodes, int node_count,
-    int root_index
-) {
-    // --- Upload raw arrays ---
-    lambertian* d_lambertians = upload_array_to_gpu(lambertians, lambertian_count);
-    diffuse_light* d_lights = upload_array_to_gpu(lights, light_count);
-    translate* d_translates = upload_array_to_gpu(translates, translate_count);
-    rotate_y* d_rotates = upload_array_to_gpu(rotates, rotate_count);
-    gpu_hittable_list* d_lists = upload_array_to_gpu(lists, list_count);
-
-    // --- Upload and fix materials ---
-    material* fixed_materials = new material[material_count];
-    for (int i = 0; i < material_count; ++i) {
-        fixed_materials[i] = materials[i];
-        if (materials[i].type == material_type::lambertian)
-            fixed_materials[i].data = &d_lambertians[static_cast<lambertian*>(materials[i].data) - lambertians];
-        else if (materials[i].type == material_type::diffuse_light)
-            fixed_materials[i].data = &d_lights[static_cast<diffuse_light*>(materials[i].data) - lights];
+    template <typename T>
+    T* upload_array(const T* host_array, int count) {
+        if (count == 0) return nullptr;
+        T* device_array;
+        CUDA_CHECK(cudaMalloc(&device_array, count * sizeof(T)));
+        CUDA_CHECK(cudaMemcpy(device_array, host_array, count * sizeof(T), cudaMemcpyHostToDevice));
+        return device_array;
     }
-    material* d_materials = upload_array_to_gpu(fixed_materials, material_count);
-    delete[] fixed_materials;
-
-    // --- Upload and fix spheres ---
-    gpu_sphere* fixed_spheres = new gpu_sphere[sphere_count];
-    for (int i = 0; i < sphere_count; ++i) {
-        fixed_spheres[i] = spheres[i];
-        fixed_spheres[i].mat_ptr = &d_materials[spheres[i].mat_ptr - materials];
-    }
-    gpu_sphere* d_spheres = upload_array_to_gpu(fixed_spheres, sphere_count);
-    delete[] fixed_spheres;
-
-    // --- Upload and fix quads ---
-    quad* fixed_quads = new quad[quad_count];
-    for (int i = 0; i < quad_count; ++i) {
-        fixed_quads[i] = quads[i];
-        fixed_quads[i].mat_ptr = &d_materials[quads[i].mat_ptr - materials];
-    }
-    quad* d_quads = upload_array_to_gpu(fixed_quads, quad_count);
-    delete[] fixed_quads;
-
-    // --- Upload and fix BVH nodes ---
-    bvh_node* fixed_nodes = new bvh_node[node_count];
-    for (int i = 0; i < node_count; ++i) {
-        fixed_nodes[i] = nodes[i];
-        auto fix = [&](hittable& h) {
-            switch (h.type) {
-                case hittable_type::sphere: h.data = &d_spheres[static_cast<gpu_sphere*>(h.data) - spheres]; break;
-                case hittable_type::quad: h.data = &d_quads[static_cast<quad*>(h.data) - quads]; break;
-                case hittable_type::bvh_node: h.data = &fixed_nodes[static_cast<bvh_node*>(h.data) - nodes]; break;
-                case hittable_type::translate: h.data = &d_translates[static_cast<translate*>(h.data) - translates]; break;
-                case hittable_type::rotate_y: h.data = &d_rotates[static_cast<rotate_y*>(h.data) - rotates]; break;
-                case hittable_type::hittable_list: h.data = &d_lists[static_cast<gpu_hittable_list*>(h.data) - lists]; break;
-                default: h.data = nullptr; break;
+    
+    inline hittable* copy_scene_to_gpu(
+        lambertian* lambertians, int lambertian_count,
+        diffuse_light* lights, int light_count,
+        material* materials, int material_count,
+        gpu_sphere* spheres, int sphere_count,
+        quad* quads, int quad_count,
+        translate* translates, int translate_count,
+        rotate_y* rotates, int rotate_count,
+        gpu_hittable_list* lists, int list_count,
+        hittable* objects, int object_count,
+        bvh_node* nodes, int node_count,
+        int root_index
+    ) {
+        // === Upload simple arrays ===
+        lambertian* d_lambertians = upload_array(lambertians, lambertian_count);
+        diffuse_light* d_lights = upload_array(lights, light_count);
+        translate* d_translates = upload_array(translates, translate_count);
+        rotate_y* d_rotates = upload_array(rotates, rotate_count);
+        gpu_hittable_list* d_lists = upload_array(lists, list_count);
+    
+        // === Fix and upload materials ===
+        material* fixed_materials = new material[material_count];
+        for (int i = 0; i < material_count; ++i) {
+            fixed_materials[i] = materials[i];
+            if (materials[i].type == material_type::lambertian)
+                fixed_materials[i].data = &d_lambertians[static_cast<lambertian*>(materials[i].data) - lambertians];
+            else if (materials[i].type == material_type::diffuse_light)
+                fixed_materials[i].data = &d_lights[static_cast<diffuse_light*>(materials[i].data) - lights];
+        }
+        material* d_materials = upload_array(fixed_materials, material_count);
+        delete[] fixed_materials;
+    
+        // === Fix and upload spheres ===
+        gpu_sphere* fixed_spheres = new gpu_sphere[sphere_count];
+        for (int i = 0; i < sphere_count; ++i) {
+            fixed_spheres[i] = spheres[i];
+            fixed_spheres[i].mat_ptr = &d_materials[spheres[i].mat_ptr - materials];
+        }
+        gpu_sphere* d_spheres = upload_array(fixed_spheres, sphere_count);
+        delete[] fixed_spheres;
+    
+        // === Fix and upload quads ===
+        quad* fixed_quads = new quad[quad_count];
+        for (int i = 0; i < quad_count; ++i) {
+            fixed_quads[i] = quads[i];
+            fixed_quads[i].mat_ptr = &d_materials[quads[i].mat_ptr - materials];
+        }
+        quad* d_quads = upload_array(fixed_quads, quad_count);
+        delete[] fixed_quads;
+    
+        // === Fix and upload BVH nodes ===
+        bvh_node* fixed_nodes = new bvh_node[node_count];
+        for (int i = 0; i < node_count; ++i) {
+            fixed_nodes[i] = nodes[i];
+            auto fix = [&](hittable& h) {
+                if (!h.data) return;
+                switch (h.type) {
+                    case hittable_type::sphere: h.data = &d_spheres[static_cast<gpu_sphere*>(h.data) - spheres]; break;
+                    case hittable_type::quad: h.data = &d_quads[static_cast<quad*>(h.data) - quads]; break;
+                    case hittable_type::bvh_node: h.data = &fixed_nodes[static_cast<bvh_node*>(h.data) - nodes]; break;
+                    case hittable_type::translate: h.data = &d_translates[static_cast<translate*>(h.data) - translates]; break;
+                    case hittable_type::rotate_y: h.data = &d_rotates[static_cast<rotate_y*>(h.data) - rotates]; break;
+                    case hittable_type::hittable_list: h.data = &d_lists[static_cast<gpu_hittable_list*>(h.data) - lists]; break;
+                    default: h.data = nullptr; break;
+                }
+            };
+            fix(fixed_nodes[i].left);
+            fix(fixed_nodes[i].right);
+        }
+        bvh_node* d_nodes = upload_array(fixed_nodes, node_count);
+        delete[] fixed_nodes;
+    
+        // === Fix and upload hittables ===
+        hittable* fixed_objects = new hittable[object_count];
+        for (int i = 0; i < object_count; ++i) {
+            fixed_objects[i] = objects[i];
+            switch (objects[i].type) {
+                case hittable_type::sphere: fixed_objects[i].data = &d_spheres[static_cast<gpu_sphere*>(objects[i].data) - spheres]; break;
+                case hittable_type::quad: fixed_objects[i].data = &d_quads[static_cast<quad*>(objects[i].data) - quads]; break;
+                case hittable_type::bvh_node: fixed_objects[i].data = &d_nodes[static_cast<bvh_node*>(objects[i].data) - nodes]; break;
+                default: fixed_objects[i].data = nullptr; break;
             }
-        };
-        fix(fixed_nodes[i].left);
-        fix(fixed_nodes[i].right);
+        }
+        hittable* d_objects = upload_array(fixed_objects, object_count);
+        delete[] fixed_objects;
+    
+        // === Determine Root Node Properly ===
+        void* gpu_data = nullptr;
+        switch (objects[root_index].type) {
+            case hittable_type::sphere: gpu_data = &d_spheres[static_cast<gpu_sphere*>(objects[root_index].data) - spheres]; break;
+            case hittable_type::quad: gpu_data = &d_quads[static_cast<quad*>(objects[root_index].data) - quads]; break;
+            case hittable_type::bvh_node: gpu_data = &d_nodes[root_index]; break;
+            case hittable_type::translate: gpu_data = &d_translates[static_cast<translate*>(objects[root_index].data) - translates]; break;
+            case hittable_type::rotate_y: gpu_data = &d_rotates[static_cast<rotate_y*>(objects[root_index].data) - rotates]; break;
+            case hittable_type::hittable_list: gpu_data = &d_lists[static_cast<gpu_hittable_list*>(objects[root_index].data) - lists]; break;
+            default: gpu_data = nullptr; break;
+        }
+    
+        hittable world_gpu = { objects[root_index].type, gpu_data };
+        hittable* d_world = upload_array(&world_gpu, 1);
+    
+        return d_world;
     }
-    bvh_node* d_nodes = upload_array_to_gpu(fixed_nodes, node_count);
-    delete[] fixed_nodes;
-
-    // --- Upload and fix hittables ---
-    hittable* fixed_objects = new hittable[object_count];
-    for (int i = 0; i < object_count; ++i) {
-        fixed_objects[i] = objects[i];
-        if (objects[i].type == hittable_type::sphere)
-            fixed_objects[i].data = &d_spheres[static_cast<gpu_sphere*>(objects[i].data) - spheres];
-        else if (objects[i].type == hittable_type::quad)
-            fixed_objects[i].data = &d_quads[static_cast<quad*>(objects[i].data) - quads];
-    }
-    hittable* d_objects = upload_array_to_gpu(fixed_objects, object_count);
-    delete[] fixed_objects;
-
-    // --- Build final world root ---
-    hittable world_gpu = { hittable_type::bvh_node, &d_nodes[root_index] };
-    hittable* d_world = upload_array_to_gpu(&world_gpu, 1);
-
-    printf("copy_scene_to_gpu() completed successfully\n");
-
-    return d_world;
-}
 
 
 
