@@ -1133,8 +1133,73 @@ void smoll_boi() {
     cam.render_gpu(d_objects);
 }
 
+void sboi() {
+    const int max_lambertians = 1;
+    const int max_spheres = 1;
+    const int max_materials = 1;
+    const int max_objects = 1;
+
+    lambertian* lambertians = new lambertian[max_lambertians];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+
+    int lambertian_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int object_count = 0;
+
+    // Host-side build
+    lambertians[lambertian_count++] = lambertian{color(0.4, 0.4, 0.4)};
+    materials[material_count++] = material{material_type::lambertian, nullptr}; // fix ptr later
+    spheres[sphere_count++] = gpu_sphere(point3(0, -1000, 0), 50, nullptr);    // fix ptr later
+    objects[object_count++] = hittable{hittable_type::sphere, nullptr};         // fix ptr later
+
+    // === Allocate fake "device" memory (just malloc on CPU) ===
+    lambertian* d_lambertians = (lambertian*)malloc(lambertian_count * sizeof(lambertian));
+    material* d_materials = (material*)malloc(material_count * sizeof(material));
+    gpu_sphere* d_spheres = (gpu_sphere*)malloc(sphere_count * sizeof(gpu_sphere));
+    hittable* d_objects = (hittable*)malloc(object_count * sizeof(hittable));
+
+    // Copy raw data
+    memcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian));
+    // Now that d_lambertians exists, fixup pointers
+    materials[0].data = d_lambertians;
+
+    memcpy(d_materials, materials, material_count * sizeof(material));
+    spheres[0].mat_ptr = d_materials;
+
+    memcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere));
+    objects[0].data = d_spheres;
+
+    memcpy(d_objects, objects, object_count * sizeof(hittable));
+
+    // === Setup camera ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+    cam.background = color(20, 20, 20);
+    cam.vfov = 20;
+    cam.lookfrom = point3(26, 3, 6);
+    cam.lookat = point3(0, 2, 0);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    // === Render simulated "GPU world" but on CPU ===
+    cam.render(d_objects);  // CPU render, using GPU-style memory setup
+
+    // === Cleanup ===
+    free(d_lambertians);
+    free(d_materials);
+    free(d_spheres);
+    free(d_objects);
+}
+
+
 int main() {
-    switch (10) {
+    switch (11) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;
@@ -1145,6 +1210,7 @@ int main() {
         case 8: final_scene();  break; // Seg Fault
         case 9: my_scene();     break;
         case 10: smoll_boi();   break;
+        case 11: sboi();        break;
     }
 
     return 0;
