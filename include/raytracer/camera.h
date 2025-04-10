@@ -55,7 +55,7 @@ class camera {
         cudaMemcpy(framebuffer, fb_device, image_size * sizeof(color), cudaMemcpyDeviceToHost);
 
         // Output Image
-        write_ppm(std::cout, framebuffer, image_height, image_width);
+        // write_ppm(std::cout, framebuffer, image_height, image_width);
         delete[] framebuffer;
     }
 
