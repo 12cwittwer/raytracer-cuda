@@ -1107,9 +1107,9 @@ void smoll_boi() {
     CUDA_CHECK(cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice));
 
     // === Fix Pointers Now that d_lambertians exists ===
-    materials[0].ptr = d_lambertians;
-    spheres[0].mat = d_materials;
-    objects[0].ptr = d_spheres;
+    materials[0].data = d_lambertians;
+    spheres[0].material = d_materials;
+    objects[0].data = d_spheres;
 
     // Copy fixed versions
     CUDA_CHECK(cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice));
