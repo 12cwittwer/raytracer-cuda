@@ -1151,101 +1151,8 @@ void my_scene() {
     delete[] nodes;
 }
 
-void simple_scene() {
-    // === Max counts for arrays ===
-    const int max_lambertians = 3;
-    const int max_lights = 1;
-    const int max_materials = max_lambertians + max_lights;
-    const int max_spheres = 2;
-    const int max_quads = 1;
-    const int max_objects = max_spheres + max_quads;
-    const int max_translates = 0;
-    const int max_rotates = 0;
-    const int max_lists = 0;
-
-    // === Host-side arrays ===
-    lambertian* lambertians = new lambertian[max_lambertians];
-    diffuse_light* lights = new diffuse_light[max_lights];
-    material* materials = new material[max_materials];
-    gpu_sphere* spheres = new gpu_sphere[max_spheres];
-    quad* quads = new quad[max_quads];
-    hittable* objects = new hittable[max_objects];
-
-    translate* translates = nullptr;
-    rotate_y* rotates = nullptr;
-    gpu_hittable_list* lists = nullptr;
-
-    int lambertian_count = 0;
-    int light_count = 0;
-    int material_count = 0;
-    int sphere_count = 0;
-    int quad_count = 0;
-    int object_count = 0;
-
-    // === Ground Sphere ===
-    lambertians[lambertian_count++] = { color(0.4, 0.4, 0.4) };
-    materials[material_count++] = { material_type::lambertian, &lambertians[lambertian_count - 1] };
-    spheres[sphere_count] = { point3(0, -1000, 0), 1000.0, &materials[material_count - 1] };
-    objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
-
-    // === Small Sphere ===
-    lambertians[lambertian_count++] = { color(0.7, 0.2, 0.2) };
-    materials[material_count++] = { material_type::lambertian, &lambertians[lambertian_count - 1] };
-    spheres[sphere_count] = { point3(0, 2, 0), 2.0, &materials[material_count - 1] };
-    objects[object_count++] = { hittable_type::sphere, &spheres[sphere_count++] };
-
-    // === Emissive Quad Light ===
-    lights[light_count++] = { color(4, 4, 4) };
-    materials[material_count++] = { material_type::diffuse_light, &lights[light_count - 1] };
-    quads[quad_count] = { point3(3, 1, -2), vec3(2, 0, 0), vec3(0, 2, 0), &materials[material_count - 1] };
-    objects[object_count++] = { hittable_type::quad, &quads[quad_count++] };
-
-    // === Camera Setup ===
-    camera cam;
-    cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 400;
-    cam.samples_per_pixel = 100;
-    cam.max_depth = 50;
-    cam.background = color(20, 20, 20);
-
-    cam.vfov = 20;
-    cam.lookfrom = point3(26, 3, 6);
-    cam.lookat = point3(0, 2, 0);
-    cam.vup = vec3(0, 1, 0);
-    cam.defocus_angle = 0;
-
-    // === Upload Scene to GPU ===
-    hittable* d_world = copy_scene_to_gpu(
-        lambertians, lambertian_count,
-        lights, light_count,
-        materials, material_count,
-        spheres, sphere_count,
-        quads, quad_count,
-        translates, max_translates,
-        rotates, max_rotates,
-        lists, max_lists,
-        objects, object_count,
-        nullptr, 0,   // no BVH nodes
-        0             // unused root_index
-    );
-
-    // === Render ===
-    cam.render_gpu(d_world);
-
-    // === Cleanup ===
-    delete[] lambertians;
-    delete[] lights;
-    delete[] materials;
-    delete[] spheres;
-    delete[] quads;
-    delete[] objects;
-}
-
-
-
-
 int main() {
-    switch (10) {
+    switch (9) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;
@@ -1255,7 +1162,6 @@ int main() {
         case 7: glass_orb();    break;
         case 8: final_scene();  break; // Seg Fault
         case 9: my_scene();     break;
-        case 10: simple_scene();break;
     }
 
     return 0;
