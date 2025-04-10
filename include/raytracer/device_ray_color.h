@@ -12,6 +12,7 @@ __device__ color ray_color(
     color background,
     curandState rng
 ) {
+    printf("Ray color successfully called");
     if (depth <= 0)
         return color(0, 0, 0);
         
