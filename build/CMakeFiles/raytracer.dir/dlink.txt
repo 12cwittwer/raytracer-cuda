@@ -1,1 +1,0 @@
-/usr/bin/nvcc -forward-unknown-to-host-compiler -G -O0 -g -lineinfo "--generate-code=arch=compute_53,code=[compute_53,sm_53]" -Xcompiler=-fPIC -Wno-deprecated-gpu-targets -shared -dlink --options-file CMakeFiles/raytracer.dir/deviceObjects1.rsp -o CMakeFiles/raytracer.dir/cmake_device_link.o --options-file CMakeFiles/raytracer.dir/deviceLinkLibs.rsp

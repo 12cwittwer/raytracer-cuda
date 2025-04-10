@@ -10,7 +10,6 @@
 __host__ __device__ inline
 hit_record hit_hittable(const hittable& h, const ray& r, interval ray_t, hit_record& rec) {
     if (h.data == nullptr) {
-        printf("hit_hittable: null data pointer! type=%d\n", (int)h.type);
         rec.hit = false;
         return rec;
     }
