@@ -14,15 +14,13 @@ __device__ color ray_color(
 ) {
     if (depth <= 0)
         return color(0, 0, 0);
-
-    printf("Made it here %d", depth
-    );
-
         
     hit_record rec;
     interval t_range(0.001, infinity);
 
+    printf("Going into hit hittable");
     rec = hit_hittable(*world, r, t_range, rec);
+    prinf("Returned from hit hittable");
 
     if (!rec.hit)
         return background;
