@@ -130,7 +130,12 @@ hittable* copy_scene_to_gpu(
         if (fixed_nodes[i].right.data == nullptr) {
             printf("WARNING: BVH node %d left.data is null! left.type=%d\n", i, (int)fixed_nodes[i].left.type);
         }
-        
+        if (fixed_nodes[i].left.data == &d_nodes[i]) {
+            printf("WARNING: BVH node %d left points to itself!\n", i);
+        }
+        if (fixed_nodes[i].right.data == &d_nodes[i]) {
+            printf("WARNING: BVH node %d right points to itself!\n", i);
+        }
     }
 
     cudaMemcpy(d_nodes, fixed_nodes, node_count * sizeof(bvh_node), cudaMemcpyHostToDevice);

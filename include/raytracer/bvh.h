@@ -31,6 +31,10 @@ struct bvh_node {
      
         if (!bbox.hit(r, ray_t)) return rec;
 
+        if (left.data == nullptr || right.data == nullptr) {
+            printf("bvh_node %p has null child: left=%p right=%p\n", this, left.data, right.data);
+        }
+
         hit_record left_rec = hit_hittable(left, r, ray_t, rec);
         hit_record right_rec = hit_hittable(right, r, interval(ray_t.min, left_rec.hit ? left_rec.t : ray_t.max), rec);
 
