@@ -15,6 +15,9 @@ __device__ color ray_color(
     if (depth <= 0)
         return color(0, 0, 0);
 
+    printf("Made it here %d", depth
+    );
+
         
     hit_record rec;
     interval t_range(0.001, infinity);

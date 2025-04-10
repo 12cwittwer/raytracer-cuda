@@ -64,7 +64,6 @@ __global__ void render_kernel(
         }
         pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
     }
-    printf("Writing to framebuffer");
     framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
 }
 
