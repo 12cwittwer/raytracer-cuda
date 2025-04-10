@@ -69,6 +69,13 @@ __global__ void render_kernel(
 
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
+        if (x == 0 && y == 0) {
+            printf("cam=%p\n", cam);
+            printf("cam->image_width=%d\n", cam->image_width);
+            printf("cam->samples_per_pixel=%d\n", cam->samples_per_pixel);
+            printf("cam->background=(%f, %f, %f)\n",
+                cam->background.x(), cam->background.y(), cam->background.z());
+        }
         ray r = get_ray(cam, x, y, &rng);
         if (world->data == nullptr) {
             if (x == 0 && y == 0) printf("CRASH PREVENTED: world->data was null\n");
