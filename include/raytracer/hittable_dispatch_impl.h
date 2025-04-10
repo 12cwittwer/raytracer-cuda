@@ -14,7 +14,6 @@ hit_record hit_hittable(const hittable& h, const ray& r, interval ray_t, hit_rec
         rec.hit = false;
         return rec;
     }
-    printf("This hittable is of type: %d\n", (int)h.type);
     switch (h.type) {
         case hittable_type::sphere:
             return hit_sphere(*reinterpret_cast<const gpu_sphere*>(h.data), r, ray_t, rec);
