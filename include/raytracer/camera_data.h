@@ -14,8 +14,8 @@ struct camera_data {
     vec3 defocus_disk_u;
     vec3 defocus_disk_v;
     vec3 u, v, w;
-    double defocus_angle;
-    double pixel_samples_scale;
+    float defocus_angle;
+    float pixel_samples_scale;
     color background;
     int image_width;
     int image_height;
@@ -38,7 +38,7 @@ __device__ inline ray get_ray(const camera_data* cam, int i, int j, curandState*
                         + ((i + offset.x()) * cam->pixel_delta_u)
                         + ((j + offset.y()) * cam->pixel_delta_v);
     
-    auto ray_origin = (cam->defocus_angle <= 0) ? cam->center : defocus_disk_sample(cam, rng);
+    auto ray_origin = (cam->defocus_angle <= 0.0f) ? cam->center : defocus_disk_sample(cam, rng);
     auto ray_direction = pixel_sample - ray_origin;
 
     return ray(ray_origin, ray_direction);
