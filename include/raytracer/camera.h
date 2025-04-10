@@ -193,10 +193,12 @@ class camera {
         cam.image_height = image_height;
         cam.samples_per_pixel = samples_per_pixel;
         cam.max_depth = max_depth;
-        cam.defocus_angle = defocus_angle;
+        cam.defocus_angle = static_cast<float>(defocus_angle);
+        cam.pixel_samples_scale = static_cast<float>(pixel_samples_scale);
     
         return cam;
     }
+    
 };
 
 #endif
