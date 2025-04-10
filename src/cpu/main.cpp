@@ -1071,12 +1071,13 @@ void my_scene() {
     delete[] nodes;
 }
 
-void smoll_boi() {
+void small_boi() {
     const int max_lambertians = 1;
     const int max_spheres = 1;
     const int max_materials = 1;
     const int max_objects = 1;
 
+    // === Host-side arrays ===
     lambertian* lambertians = new lambertian[max_lambertians];
     material* materials = new material[max_materials];
     gpu_sphere* spheres = new gpu_sphere[max_spheres];
@@ -1087,51 +1088,72 @@ void smoll_boi() {
     int sphere_count = 0;
     int object_count = 0;
 
-    // === Create Host Objects ===
-    lambertians[lambertian_count++] = lambertian{color(0.4, 0.4, 0.4)};
-    materials[material_count++] = material{material_type::lambertian, nullptr}; // Fix ptr later
-    spheres[sphere_count++] = gpu_sphere(point3(0, -1000, 0), 50, nullptr);    // Fix ptr later
-    objects[object_count++] = hittable{hittable_type::sphere, nullptr};         // Fix ptr later
+    // === Build scene ===
+    lambertians[lambertian_count++] = lambertian{color(0.8, 0.3, 0.3)};
 
-    // === GPU Memory ===
+    materials[material_count++] = material{
+        material_type::lambertian,
+        nullptr  // fix later
+    };
+
+    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
+
+    objects[object_count++] = hittable{
+        hittable_type::sphere,
+        nullptr  // fix later
+    };
+
+    // === Allocate device memory ===
     lambertian* d_lambertians;
     material* d_materials;
     gpu_sphere* d_spheres;
     hittable* d_objects;
 
-    CUDA_CHECK(cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian)));
-    CUDA_CHECK(cudaMalloc(&d_materials, material_count * sizeof(material)));
-    CUDA_CHECK(cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere)));
-    CUDA_CHECK(cudaMalloc(&d_objects, object_count * sizeof(hittable)));
+    cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
+    cudaMalloc(&d_materials, material_count * sizeof(material));
+    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
+    cudaMalloc(&d_objects, object_count * sizeof(hittable));
 
-    CUDA_CHECK(cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice));
-
-    // === Fix Pointers Now that d_lambertians exists ===
+    // === Copy raw ===
+    cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice);
     materials[0].data = d_lambertians;
+
+    cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
     spheres[0].mat_ptr = d_materials;
+
+    cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
     objects[0].data = d_spheres;
 
-    // Copy fixed versions
-    CUDA_CHECK(cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice));
-    CUDA_CHECK(cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice));
+    cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
 
-    // === Camera Setup ===
+    // === Camera ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
     cam.samples_per_pixel = 100;
     cam.max_depth = 50;
-    cam.background = color(20, 20, 20);
+    cam.background = color(0.2, 0.2, 0.2);
     cam.vfov = 20;
-    cam.lookfrom = point3(26, 3, 6);
-    cam.lookat = point3(0, 2, 0);
+    cam.lookfrom = point3(0, 0, 0);
+    cam.lookat = point3(0, 0, -1);
     cam.vup = vec3(0, 1, 0);
     cam.defocus_angle = 0;
 
-    // === Render ===
+    // === Render using real GPU pointers ===
     cam.render_gpu(d_objects);
+
+    // === Cleanup ===
+    cudaFree(d_lambertians);
+    cudaFree(d_materials);
+    cudaFree(d_spheres);
+    cudaFree(d_objects);
+
+    delete[] lambertians;
+    delete[] materials;
+    delete[] spheres;
+    delete[] objects;
 }
+
 
 void sboi() {
     const int max_lambertians = 1;
@@ -1139,6 +1161,7 @@ void sboi() {
     const int max_materials = 1;
     const int max_objects = 1;
 
+    // === Host-side arrays ===
     lambertian* lambertians = new lambertian[max_lambertians];
     material* materials = new material[max_materials];
     gpu_sphere* spheres = new gpu_sphere[max_spheres];
@@ -1149,21 +1172,29 @@ void sboi() {
     int sphere_count = 0;
     int object_count = 0;
 
-    // Host-side build
-    lambertians[lambertian_count++] = lambertian{color(0.4, 0.4, 0.4)};
-    materials[material_count++] = material{material_type::lambertian, nullptr}; // fix ptr later
-    spheres[sphere_count++] = gpu_sphere(point3(0, -1000, 0), 50, nullptr);    // fix ptr later
-    objects[object_count++] = hittable{hittable_type::sphere, nullptr};         // fix ptr later
+    // === Build scene ===
+    lambertians[lambertian_count++] = lambertian{color(0.8, 0.3, 0.3)};  // bright red-ish
 
-    // === Allocate fake "device" memory (just malloc on CPU) ===
+    materials[material_count++] = material{
+        material_type::lambertian,
+        nullptr  // fix later
+    };
+
+    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
+
+    objects[object_count++] = hittable{
+        hittable_type::sphere,
+        nullptr  // fix later
+    };
+
+    // === Malloc fake "device" memory ===
     lambertian* d_lambertians = (lambertian*)malloc(lambertian_count * sizeof(lambertian));
     material* d_materials = (material*)malloc(material_count * sizeof(material));
     gpu_sphere* d_spheres = (gpu_sphere*)malloc(sphere_count * sizeof(gpu_sphere));
     hittable* d_objects = (hittable*)malloc(object_count * sizeof(hittable));
 
-    // Copy raw data
+    // === Copy raw ===
     memcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian));
-    // Now that d_lambertians exists, fixup pointers
     materials[0].data = d_lambertians;
 
     memcpy(d_materials, materials, material_count * sizeof(material));
@@ -1174,21 +1205,21 @@ void sboi() {
 
     memcpy(d_objects, objects, object_count * sizeof(hittable));
 
-    // === Setup camera ===
+    // === Camera ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
     cam.samples_per_pixel = 100;
     cam.max_depth = 50;
-    cam.background = color(20, 20, 20);
+    cam.background = color(0.2, 0.2, 0.2);  // gray background
     cam.vfov = 20;
-    cam.lookfrom = point3(26, 3, 6);
-    cam.lookat = point3(0, 2, 0);
+    cam.lookfrom = point3(0, 0, 0);
+    cam.lookat = point3(0, 0, -1);
     cam.vup = vec3(0, 1, 0);
     cam.defocus_angle = 0;
 
-    // === Render simulated "GPU world" but on CPU ===
-    cam.render(d_objects);  // CPU render, using GPU-style memory setup
+    // === Render CPU world built like GPU ===
+    cam.render(d_objects);  // must hit the sphere dead center
 
     // === Cleanup ===
     free(d_lambertians);
@@ -1198,8 +1229,9 @@ void sboi() {
 }
 
 
+
 int main() {
-    switch (11) {
+    switch (10) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;
@@ -1209,7 +1241,7 @@ int main() {
         case 7: glass_orb();    break;
         case 8: final_scene();  break; // Seg Fault
         case 9: my_scene();     break;
-        case 10: smoll_boi();   break;
+        case 10: small_boi();   break;
         case 11: sboi();        break;
     }
 
