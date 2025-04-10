@@ -1140,6 +1140,7 @@ void small_boi() {
     cam.defocus_angle = 0;
 
     // === Render using real GPU pointers ===
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384)); // or higher
     cam.render_gpu(d_objects);
 
     // === Cleanup ===
@@ -1219,7 +1220,6 @@ void sboi() {
     cam.defocus_angle = 0;
 
     // === Render CPU world built like GPU ===
-    cudaDeviceSetLimit(cudaLimitStackSize, 16384); // or higher
     cam.render(d_objects);  // must hit the sphere dead center
 
     // === Cleanup ===
