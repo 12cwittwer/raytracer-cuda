@@ -44,7 +44,8 @@ __global__ void render_kernel(
         printf("World data is %p\n", world->data);
     }
 
-    printf("Do they all crash\n");
+    printf("World first hittable is %d\n", (int)world->type);
+    printf("World data is %p\n", world->data);
 
     int pixel_index = y * cam->image_width + x;
     curandState rng;
