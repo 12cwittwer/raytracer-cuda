@@ -41,6 +41,7 @@ __global__ void render_kernel(
 
     if (x == 0 && y == 0) {
         printf("First hittable is %d\n", (int)world->type);
+        printf("World data is %p\n", world->data);
     }
 
     int pixel_index = y * cam->image_width + x;
