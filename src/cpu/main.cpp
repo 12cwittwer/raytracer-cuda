@@ -1219,6 +1219,7 @@ void sboi() {
     cam.defocus_angle = 0;
 
     // === Render CPU world built like GPU ===
+    cudaDeviceSetLimit(cudaLimitStackSize, 16384); // or higher
     cam.render(d_objects);  // must hit the sphere dead center
 
     // === Cleanup ===
