@@ -64,6 +64,10 @@ hittable* copy_scene_to_gpu(
                 fixed_nodes[i].left.data = nullptr; // crash safe but visible
                 break;
         }
+        if (fixed_nodes[i].left.data == nullptr) {
+            printf("WARNING: BVH node %d left.data is null! left.type=%d\n", i, (int)fixed_nodes[i].left.type);
+        }
+        
 
         switch (fixed_nodes[i].right.type) {
             case hittable_type::sphere:
@@ -83,6 +87,10 @@ hittable* copy_scene_to_gpu(
                 fixed_nodes[i].left.data = nullptr; // crash safe but visible
                 break;
         }
+        if (fixed_nodes[i].right.data == nullptr) {
+            printf("WARNING: BVH node %d left.data is null! left.type=%d\n", i, (int)fixed_nodes[i].left.type);
+        }
+        
     }
 
     cudaMemcpy(d_nodes, fixed_nodes, node_count * sizeof(bvh_node), cudaMemcpyHostToDevice);
