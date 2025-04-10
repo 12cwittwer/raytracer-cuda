@@ -33,6 +33,21 @@ __global__ void render_kernel(
         printf("Kernel launched\n");
     }
 
+    if (!cam) {
+        if (x == 0 && y == 0) printf("cam is null\n");
+        return;
+    }
+
+    if (!world) {
+        if (x == 0 && y == 0) printf("world is null\n");
+        return;
+    }
+
+    if (!framebuffer) {
+        if (x == 0 && y == 0) printf("framebuffer is null\n");
+        return;
+    }
+
     if (x >= cam->image_width || y >= cam->image_height) return;
 
     if (x == 0 && y == 0) {
