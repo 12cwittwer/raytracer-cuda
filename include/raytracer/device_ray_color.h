@@ -21,7 +21,7 @@ __device__ color ray_color(
         
     printf("Creating Interval\n");
     hit_record rec;
-    interval t_range(0.001, infinity);
+    interval t_range(0.001, 1.0e30);
     printf("Interval Created\n");
 
     printf("Going into hit hittable\n");
