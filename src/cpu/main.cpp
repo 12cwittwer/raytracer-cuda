@@ -1088,10 +1088,10 @@ void smoll_boi() {
     int object_count = 0;
 
     // === Create Host Objects ===
-    lambertians[lambertian_count++] = lambertian(color(0.4, 0.4, 0.4));
-    materials[material_count++] = material(material_type::lambertian, nullptr); // Fix ptr later
+    lambertians[lambertian_count++] = lambertian{color(0.4, 0.4, 0.4)};
+    materials[material_count++] = material{material_type::lambertian, nullptr}; // Fix ptr later
     spheres[sphere_count++] = gpu_sphere(point3(0, -1000, 0), 50, nullptr);    // Fix ptr later
-    objects[object_count++] = hittable(hittable_type::sphere, nullptr);         // Fix ptr later
+    objects[object_count++] = hittable{hittable_type::sphere, nullptr};         // Fix ptr later
 
     // === GPU Memory ===
     lambertian* d_lambertians;
@@ -1108,7 +1108,7 @@ void smoll_boi() {
 
     // === Fix Pointers Now that d_lambertians exists ===
     materials[0].data = d_lambertians;
-    spheres[0].material = d_materials;
+    spheres[0].mat_ptr = d_materials;
     objects[0].data = d_spheres;
 
     // Copy fixed versions
