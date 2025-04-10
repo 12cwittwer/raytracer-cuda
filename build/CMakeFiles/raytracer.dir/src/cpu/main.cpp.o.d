@@ -231,6 +231,11 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_list.h \
  /home/christianw/raytracer-cuda/include/raytracer/camera_data.h \
  /home/christianw/raytracer-cuda/include/raytracer/render.h \
+ /home/christianw/raytracer-cuda/include/raytracer/cuda_utils.h \
+ /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_uninitialized.h \
+ /usr/include/c++/13/bits/stl_vector.h \
+ /usr/include/c++/13/bits/stl_bvector.h \
+ /usr/include/c++/13/bits/vector.tcc \
  /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_list.h \
  /home/christianw/raytracer-cuda/include/raytracer/material.h \

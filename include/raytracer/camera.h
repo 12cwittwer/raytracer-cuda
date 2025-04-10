@@ -8,6 +8,9 @@
 #include "hittable_dispatch_impl.h"
 #include "camera_data.h"
 #include "render.h"
+#include "raytracer/cuda_utils.h"
+
+#include <vector>
 
 extern void launch_render_kernel(const camera_data*, const hittable*, color*, int, int);
 
@@ -29,35 +32,35 @@ class camera {
 
     void render_gpu(const hittable* d_world) {
         initialize();
-
-        int image_size = image_width * image_height;
-
-        // Allocate framebuffer
-        color* fb_device;
-        cudaMalloc(&fb_device, image_size * sizeof(color));
-
-        // Copy camera data to GPU
-        camera_data cam_data = get_camera_data();
-        camera_data* cam_device;
-        cudaMalloc(&cam_device, sizeof(camera_data));
-        cudaMemcpy(cam_device, &cam_data, sizeof(camera_data), cudaMemcpyHostToDevice);
-
-        // Copy world to GPU
-        // hittable* world_device;
-        // cudaMalloc(&world_device, sizeof(hittable));
-        // cudaMemcpy(world_device, &world, sizeof(hittable), cudaMemcpyHostToDevice);
-
-        // Launch CUDA render kernal
-        launch_render_kernel(cam_device, d_world, fb_device, image_width, image_height);
-
-        // Copy framebuffer back
-        color* framebuffer = new color[image_size];
-        cudaMemcpy(framebuffer, fb_device, image_size * sizeof(color), cudaMemcpyDeviceToHost);
-
-        // Output Image
-        // write_ppm(std::cout, framebuffer, image_height, image_width);
-        delete[] framebuffer;
+    
+        const int image_size = image_width * image_height;
+    
+        // --- Allocate framebuffer on device ---
+        color* d_fb = nullptr;
+        CUDA_CHECK(cudaMalloc(&d_fb, image_size * sizeof(color)));
+    
+        // --- Copy camera data to device ---
+        camera_data h_cam = get_camera_data();
+    
+        camera_data* d_cam = nullptr;
+        CUDA_CHECK(cudaMalloc(&d_cam, sizeof(camera_data)));
+        CUDA_CHECK(cudaMemcpy(d_cam, &h_cam, sizeof(camera_data), cudaMemcpyHostToDevice));
+    
+        // --- Launch render kernel ---
+        launch_render_kernel(d_cam, d_world, d_fb, image_width, image_height);
+    
+        // --- Copy framebuffer back to host ---
+        std::vector<color> h_fb(image_size);
+        CUDA_CHECK(cudaMemcpy(h_fb.data(), d_fb, image_size * sizeof(color), cudaMemcpyDeviceToHost));
+    
+        // --- Output image (optional) ---
+        write_ppm(std::cout, h_fb.data(), image_height, image_width);
+    
+        // --- Cleanup ---
+        CUDA_CHECK(cudaFree(d_fb));
+        CUDA_CHECK(cudaFree(d_cam));
     }
+    
 
     void render(const hittable& world) {
         initialize();

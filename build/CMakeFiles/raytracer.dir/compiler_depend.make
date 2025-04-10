@@ -9,6 +9,7 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: /home/christianw/raytracer-cuda/src
   /home/christianw/raytracer-cuda/include/raytracer/camera_data.h \
   /home/christianw/raytracer-cuda/include/raytracer/color.h \
   /home/christianw/raytracer-cuda/include/raytracer/cuda_compat.h \
+  /home/christianw/raytracer-cuda/include/raytracer/cuda_utils.h \
   /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
   /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h \
   /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch_impl.h \
@@ -74,6 +75,7 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: /home/christianw/raytracer-cuda/src
   /usr/include/c++/13/bits/std_abs.h \
   /usr/include/c++/13/bits/stl_algo.h \
   /usr/include/c++/13/bits/stl_algobase.h \
+  /usr/include/c++/13/bits/stl_bvector.h \
   /usr/include/c++/13/bits/stl_construct.h \
   /usr/include/c++/13/bits/stl_function.h \
   /usr/include/c++/13/bits/stl_heap.h \
@@ -83,6 +85,8 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: /home/christianw/raytracer-cuda/src
   /usr/include/c++/13/bits/stl_pair.h \
   /usr/include/c++/13/bits/stl_relops.h \
   /usr/include/c++/13/bits/stl_tempbuf.h \
+  /usr/include/c++/13/bits/stl_uninitialized.h \
+  /usr/include/c++/13/bits/stl_vector.h \
   /usr/include/c++/13/bits/streambuf.tcc \
   /usr/include/c++/13/bits/streambuf_iterator.h \
   /usr/include/c++/13/bits/string_view.tcc \
@@ -91,6 +95,7 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: /home/christianw/raytracer-cuda/src
   /usr/include/c++/13/bits/uses_allocator.h \
   /usr/include/c++/13/bits/uses_allocator_args.h \
   /usr/include/c++/13/bits/utility.h \
+  /usr/include/c++/13/bits/vector.tcc \
   /usr/include/c++/13/cctype \
   /usr/include/c++/13/cerrno \
   /usr/include/c++/13/clocale \
@@ -142,6 +147,7 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: /home/christianw/raytracer-cuda/src
   /usr/include/c++/13/type_traits \
   /usr/include/c++/13/typeinfo \
   /usr/include/c++/13/utility \
+  /usr/include/c++/13/vector \
   /usr/include/channel_descriptor.h \
   /usr/include/crt/host_config.h \
   /usr/include/crt/host_defines.h \
@@ -846,15 +852,13 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/x86_64-linux-gnu/bits/types/time_t.h:
 
-/usr/include/c++/12/bits/ostream.tcc:
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
 
-/usr/include/c++/13/tr1/beta_function.tcc:
+/usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:
 
-/usr/include/crt/sm_70_rt.h:
+/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
 
-/usr/include/c++/13/bits/stl_function.h:
-
-/usr/include/c++/13/system_error:
+/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
 
 /usr/include/c++/12/bits/streambuf.tcc:
 
@@ -894,6 +898,12 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
 
+/usr/include/c++/12/iosfwd:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:
+
+/usr/include/c++/13/ext/atomicity.h:
+
 /usr/include/x86_64-linux-gnu/c++/12/bits/c++locale.h:
 
 /usr/include/c++/13/cctype:
@@ -920,12 +930,6 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/c++/13/bits/stl_algo.h:
 
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
-
 /usr/include/c++/13/ostream:
 
 /usr/include/c++/12/cerrno:
@@ -942,15 +946,23 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
 
+/usr/include/c++/13/bits/vector.tcc:
+
 /usr/include/x86_64-linux-gnu/c++/12/bits/gthr.h:
 
 /usr/include/c++/13/stdlib.h:
 
+/usr/include/crt/sm_70_rt.h:
+
+/usr/include/c++/13/bits/stl_function.h:
+
+/usr/include/c++/12/bits/ostream.tcc:
+
+/usr/include/c++/13/tr1/beta_function.tcc:
+
 /usr/include/x86_64-linux-gnu/c++/12/bits/os_defines.h:
 
 /usr/include/c++/13/bits/uses_allocator_args.h:
-
-/usr/include/c++/13/bits/new_allocator.h:
 
 /usr/include/c++/13/pstl/execution_defs.h:
 
@@ -984,9 +996,27 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/endian.h:
 
+/usr/include/c++/13/bits/new_allocator.h:
+
+/usr/include/c++/13/bits/stl_uninitialized.h:
+
+/usr/include/c++/13/bits/stl_vector.h:
+
 /usr/include/c++/12/bits/streambuf_iterator.h:
 
 /usr/include/c++/13/bits/stl_tempbuf.h:
+
+/usr/include/c++/12/bits/istream.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
+
+/usr/include/c++/13/ext/numeric_traits.h:
+
+/usr/include/c++/13/bits/stl_iterator.h:
 
 /usr/include/c++/13/bits/functexcept.h:
 
@@ -996,13 +1026,13 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/c++/13/bits/stl_construct.h:
 
+/usr/include/c++/13/bits/stl_bvector.h:
+
+/usr/include/c++/13/bits/allocator.h:
+
 /usr/include/c++/13/bits/stl_algobase.h:
 
 /home/christianw/raytracer-cuda/include/raytracer/material.h:
-
-/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
-
-/usr/include/c++/13/bits/string_view.tcc:
 
 /usr/include/c++/12/tr1/gamma.tcc:
 
@@ -1014,9 +1044,21 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/c++/13/stdexcept:
 
+/usr/include/c++/13/system_error:
+
+/usr/include/c++/13/bits/string_view.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
+
 /usr/include/c++/13/bits/ptr_traits.h:
 
 /usr/include/c++/13/iosfwd:
+
+/usr/include/crt/math_functions.hpp:
+
+/usr/include/c++/12/bits/allocator.h:
+
+/usr/include/c++/13/bits/move.h:
 
 /usr/include/c++/13/algorithm:
 
@@ -1039,10 +1081,6 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/error_t.h:
-
-/home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h:
-
-/usr/include/features-time64.h:
 
 /usr/include/c++/13/bits/hash_bytes.h:
 
@@ -1110,6 +1148,12 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/memory.h:
 
+/home/christianw/raytracer-cuda/include/raytracer/cuda_utils.h:
+
+/usr/include/c++/13/bits/cxxabi_init_exception.h:
+
+/usr/include/c++/13/typeinfo:
+
 /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
 
 /home/christianw/raytracer-cuda/include/raytracer/random_utils.h:
@@ -1117,10 +1161,6 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 /usr/include/c++/13/bits/ostream.tcc:
 
 /home/christianw/raytracer-cuda/include/raytracer/camera_data.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
-
-/home/christianw/raytracer-cuda/include/raytracer/interval.h:
 
 /usr/include/c++/12/bits/stl_construct.h:
 
@@ -1151,6 +1191,14 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 /usr/include/c++/13/tr1/poly_hermite.tcc:
 
 /usr/include/c++/13/backward/binders.h:
+
+/home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h:
+
+/usr/include/features-time64.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
+
+/home/christianw/raytracer-cuda/include/raytracer/interval.h:
 
 /home/christianw/raytracer-cuda/include/raytracer/instances.h:
 
@@ -1204,25 +1252,11 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/c++/13/bits/cpp_type_traits.h:
 
-/usr/include/c++/13/string:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
-
 /usr/include/x86_64-linux-gnu/bits/types.h:
-
-/usr/include/crt/math_functions.hpp:
-
-/usr/include/c++/12/bits/allocator.h:
-
-/usr/include/c++/13/bits/move.h:
 
 /usr/include/c++/12/bits/stl_function.h:
 
 /usr/include/c++/13/bits/cxxabi_forced.h:
-
-/usr/include/c++/13/bits/cxxabi_init_exception.h:
-
-/usr/include/c++/13/typeinfo:
 
 /usr/include/c++/13/bits/functional_hash.h:
 
@@ -1240,11 +1274,13 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
-/usr/include/c++/13/bits/allocator.h:
-
 /usr/include/c++/13/bits/uniform_int_dist.h:
 
 /usr/include/c++/13/bits/locale_classes.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
+
+/usr/include/c++/13/string:
 
 /usr/include/c++/13/tr1/ell_integral.tcc:
 
@@ -1258,9 +1294,9 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/c++/12/bits/alloc_traits.h:
 
-/usr/include/c++/13/tr1/bessel_function.tcc:
-
 /usr/include/c++/13/initializer_list:
+
+/usr/include/c++/13/tr1/bessel_function.tcc:
 
 /usr/include/limits.h:
 
@@ -1300,6 +1336,8 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/c++/13/utility:
 
+/usr/include/c++/13/vector:
+
 /usr/include/crt/host_config.h:
 
 /usr/include/curand_mtgp32_kernel.h:
@@ -1323,12 +1361,6 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 /usr/include/x86_64-linux-gnu/c++/12/bits/atomic_word.h:
 
 /usr/include/x86_64-linux-gnu/asm/errno.h:
-
-/usr/include/c++/13/ext/numeric_traits.h:
-
-/usr/include/c++/13/bits/stl_iterator.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
 /usr/include/crt/cudacc_ext.h:
 
@@ -1436,8 +1468,6 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 
 /usr/include/x86_64-linux-gnu/bits/floatn.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
-
 /usr/include/x86_64-linux-gnu/bits/fp-fast.h:
 
 /usr/include/c++/13/string_view:
@@ -1491,15 +1521,3 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o: /home/christianw/raytracer-cuda/sr
 /usr/include/c++/13/bits/charconv.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
-
-/usr/include/c++/12/bits/istream.tcc:
-
-/usr/include/asm-generic/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
-
-/usr/include/c++/12/iosfwd:
-
-/usr/include/c++/13/ext/atomicity.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_tm.h:

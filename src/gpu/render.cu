@@ -57,16 +57,21 @@ __global__ void render_kernel(
     framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
 }
 
+#include "raytracer/cuda_utils.h"  // for CUDA_CHECK
+
 void launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height) {
-    dim3 threads_per_block(8, 8);
-    dim3 num_blocks(
+    const dim3 threads_per_block(8, 8);
+    const dim3 num_blocks(
         (image_width + threads_per_block.x - 1) / threads_per_block.x,
         (image_height + threads_per_block.y - 1) / threads_per_block.y
     );
+
+    // Launch kernel
     render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
-    cudaError_t err = cudaGetLastError();
-    if (err != cudaSuccess) {
-        printf("CUDA Launch Error: %s\n", cudaGetErrorString(err));
-    }
-    cudaDeviceSynchronize();
+
+    // Check for immediate kernel launch errors
+    CUDA_CHECK(cudaGetLastError());
+
+    // Ensure kernel is finished before moving on
+    CUDA_CHECK(cudaDeviceSynchronize());
 }

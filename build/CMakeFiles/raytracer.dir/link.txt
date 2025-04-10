@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o CMakeFiles/raytracer.dir/src/gpu/render.cu.o CMakeFiles/raytracer.dir/cmake_device_link.o -o raytracer   -L/usr/lib/x86_64-linux-gnu/stubs  -L/usr/lib/gcc/x86_64-linux-gnu/12  -lcudadevrt -lcudart_static -lrt -lpthread -ldl 
+/usr/bin/c++ -O0 -g CMakeFiles/raytracer.dir/src/cpu/main.cpp.o CMakeFiles/raytracer.dir/src/gpu/render.cu.o CMakeFiles/raytracer.dir/cmake_device_link.o -o raytracer   -L/usr/lib/x86_64-linux-gnu/stubs  -L/usr/lib/gcc/x86_64-linux-gnu/12  -lcudadevrt -lcudart_static -lrt -lpthread -ldl 

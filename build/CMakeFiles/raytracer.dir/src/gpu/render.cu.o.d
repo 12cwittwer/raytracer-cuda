@@ -311,4 +311,5 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o : /home/christianw/raytracer-cuda/s
     /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
     /home/christianw/raytracer-cuda/include/raytracer/instances.h \
     /home/christianw/raytracer-cuda/include/raytracer/device_ray_color.h \
-    /home/christianw/raytracer-cuda/include/raytracer/render.h
+    /home/christianw/raytracer-cuda/include/raytracer/render.h \
+    /home/christianw/raytracer-cuda/include/raytracer/cuda_utils.h
