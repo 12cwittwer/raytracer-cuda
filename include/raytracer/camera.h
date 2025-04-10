@@ -62,7 +62,7 @@ class camera {
     }
     
 
-    void render(const hittable& world) {
+    void render(const hittable* world) {
         initialize();
 
         std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -73,7 +73,7 @@ class camera {
                 color pixel_color(0, 0, 0);
                 for (int sample = 0; sample < samples_per_pixel; sample++) {
                     ray r = get_ray(i, j);
-                    pixel_color += ray_color(r, max_depth, world);
+                    pixel_color += ray_color(r, max_depth, *world);
                 }
                 write_color(std::cout, pixel_samples_scale * pixel_color);
             }

@@ -379,7 +379,7 @@ void quads() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(&world);
 
     delete[] lambertians;
     delete[] materials;
@@ -444,7 +444,7 @@ void light() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(&world);
 
     // Cleanup
     delete[] lambertians;
@@ -549,7 +549,7 @@ void cornell() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(&world);
 
     // === Cleanup ===
     delete[] quads;
@@ -659,7 +659,7 @@ void final() {
     cam.vup = vec3(0,1,0);
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(&world);
 
     // === Cleanup ===
     delete[] quads;
@@ -755,7 +755,7 @@ void glass_box() {
 
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(&world);
 
     // Cleanup
     delete[] quads;
@@ -834,7 +834,7 @@ void glass_orb() {
     cam.vup      = vec3(0,1,0);
     cam.defocus_angle = 0.0;
 
-    cam.render(world);
+    cam.render(&world);
 
     // === Cleanup ===
     delete[] lambertians;
@@ -955,7 +955,7 @@ void final_scene() {
     cam.vup = vec3(0,1,0);
     cam.defocus_angle = 0;
 
-    cam.render(world);
+    cam.render(&world);
 
     // Cleanup
     delete[] objects;
@@ -1130,7 +1130,7 @@ void smoll_boi() {
     cam.defocus_angle = 0;
 
     // === Render ===
-    cam.render_gpu(d_objects);
+    cam.render(d_objects);
 }
 
 int main() {
