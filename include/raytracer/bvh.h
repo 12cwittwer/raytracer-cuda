@@ -16,10 +16,19 @@ struct bvh_node {
         hit_record rec;
         rec.hit = false;
 
+        if (left.data == nullptr) {
+            printf("BVH left.data is null!\n");
+        }
+        if (right.data == nullptr) {
+            printf("BVH right.data is null!\n");
+        }
+
         if (!bbox.hit(r, ray_t)) return rec;
 
         hit_record left_rec = hit_hittable(left, r, ray_t, rec);
         hit_record right_rec = hit_hittable(right, r, interval(ray_t.min, left_rec.hit ? left_rec.t : ray_t.max), rec);
+
+        printf("BVH hit results: left_hit=%d right_hit=%d\n", left_rec.hit, right_rec.hit);
 
         if (left_rec.hit && (!right_rec.hit || left_rec.t < right_rec.t)) {
             return left_rec;
