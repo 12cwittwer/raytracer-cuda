@@ -1071,8 +1071,70 @@ void my_scene() {
     delete[] nodes;
 }
 
+void smoll_boi() {
+    const int max_lambertians = 1;
+    const int max_spheres = 1;
+    const int max_materials = 1;
+    const int max_objects = 1;
+
+    lambertian* lambertians = new lambertian[max_lambertians];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+
+    int lambertian_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int object_count = 0;
+
+    // === Create Host Objects ===
+    lambertians[lambertian_count++] = lambertian(color(0.4, 0.4, 0.4));
+    materials[material_count++] = material(material_type::lambertian, nullptr); // Fix ptr later
+    spheres[sphere_count++] = gpu_sphere(point3(0, -1000, 0), 50, nullptr);    // Fix ptr later
+    objects[object_count++] = hittable(hittable_type::sphere, nullptr);         // Fix ptr later
+
+    // === GPU Memory ===
+    lambertian* d_lambertians;
+    material* d_materials;
+    gpu_sphere* d_spheres;
+    hittable* d_objects;
+
+    CUDA_CHECK(cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian)));
+    CUDA_CHECK(cudaMalloc(&d_materials, material_count * sizeof(material)));
+    CUDA_CHECK(cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere)));
+    CUDA_CHECK(cudaMalloc(&d_objects, object_count * sizeof(hittable)));
+
+    CUDA_CHECK(cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice));
+
+    // === Fix Pointers Now that d_lambertians exists ===
+    materials[0].ptr = d_lambertians;
+    spheres[0].mat = d_materials;
+    objects[0].ptr = d_spheres;
+
+    // Copy fixed versions
+    CUDA_CHECK(cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice));
+
+    // === Camera Setup ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 50;
+    cam.background = color(20, 20, 20);
+    cam.vfov = 20;
+    cam.lookfrom = point3(26, 3, 6);
+    cam.lookat = point3(0, 2, 0);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    // === Render ===
+    cam.render_gpu(d_objects);
+}
+
 int main() {
-    switch (9) {
+    switch (10) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;
@@ -1082,6 +1144,7 @@ int main() {
         case 7: glass_orb();    break;
         case 8: final_scene();  break; // Seg Fault
         case 9: my_scene();     break;
+        case 10: smoll_boi();   break;
     }
 
     return 0;
