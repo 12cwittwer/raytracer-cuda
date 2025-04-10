@@ -20,7 +20,7 @@ __device__ color ray_color(
 
     printf("Going into hit hittable");
     rec = hit_hittable(*world, r, t_range, rec);
-    prinf("Returned from hit hittable");
+    printf("Returned from hit hittable");
 
     if (!rec.hit)
         return background;
