@@ -9,6 +9,17 @@
 #include "raytracer/sphere_gpu.h"
 #include "raytracer/instances.h"
 
+#include "raytracer/cuda_utils.h"  // for CUDA_CHECK
+
+template <typename T>
+T* upload_array_to_gpu(const T* host_array, int count) {
+    if (count == 0) return nullptr;
+    T* device_array;
+    CUDA_CHECK(cudaMalloc(&device_array, count * sizeof(T)));
+    CUDA_CHECK(cudaMemcpy(device_array, host_array, count * sizeof(T), cudaMemcpyHostToDevice));
+    return device_array;
+}
+
 hittable* copy_scene_to_gpu(
     lambertian* lambertians, int lambertian_count,
     diffuse_light* lights, int light_count,
@@ -21,190 +32,86 @@ hittable* copy_scene_to_gpu(
     hittable* objects, int object_count,
     bvh_node* nodes, int node_count,
     int root_index
-)
- {
-    // === Copy base arrays ===
-    lambertian* d_lambertians;
-    cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
-    cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice);
+) {
+    // --- Upload raw arrays ---
+    lambertian* d_lambertians = upload_array_to_gpu(lambertians, lambertian_count);
+    diffuse_light* d_lights = upload_array_to_gpu(lights, light_count);
+    translate* d_translates = upload_array_to_gpu(translates, translate_count);
+    rotate_y* d_rotates = upload_array_to_gpu(rotates, rotate_count);
+    gpu_hittable_list* d_lists = upload_array_to_gpu(lists, list_count);
 
-    diffuse_light* d_lights;
-    cudaMalloc(&d_lights, light_count * sizeof(diffuse_light));
-    cudaMemcpy(d_lights, lights, light_count * sizeof(diffuse_light), cudaMemcpyHostToDevice);
-
-    material* d_materials;
-    cudaMalloc(&d_materials, material_count * sizeof(material));
-
-    gpu_sphere* d_spheres;
-    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
-
-    quad* d_quads;
-    cudaMalloc(&d_quads, quad_count * sizeof(quad));
-
-    translate* d_translates;
-    cudaMalloc(&d_translates, translate_count * sizeof(translate));
-    cudaMemcpy(d_translates, translates, translate_count * sizeof(translate), cudaMemcpyHostToDevice);
-    
-    rotate_y* d_rotates;
-    cudaMalloc(&d_rotates, rotate_count * sizeof(rotate_y));
-    cudaMemcpy(d_rotates, rotates, rotate_count * sizeof(rotate_y), cudaMemcpyHostToDevice);
-    
-    gpu_hittable_list* d_lists;
-    cudaMalloc(&d_lists, list_count * sizeof(gpu_hittable_list));
-    cudaMemcpy(d_lists, lists, list_count * sizeof(gpu_hittable_list), cudaMemcpyHostToDevice);
-
-    hittable* d_objects;
-    cudaMalloc(&d_objects, object_count * sizeof(hittable));
-
-    bvh_node* d_nodes;
-    cudaMalloc(&d_nodes, node_count * sizeof(bvh_node));
-    bvh_node* fixed_nodes = new bvh_node[node_count];
-    for (int i = 0; i < node_count; ++i) {
-        fixed_nodes[i] = nodes[i];
-
-        switch (fixed_nodes[i].left.type) {
-            case hittable_type::sphere:
-                fixed_nodes[i].left.data = &d_spheres[
-                    static_cast<gpu_sphere*>(nodes[i].left.data) - spheres];
-                break;
-            case hittable_type::quad:
-                fixed_nodes[i].left.data = &d_quads[
-                    static_cast<quad*>(nodes[i].left.data) - quads];
-                break;
-            case hittable_type::bvh_node:
-                fixed_nodes[i].left.data = &d_nodes[
-                    static_cast<bvh_node*>(nodes[i].left.data) - nodes];
-                break;
-            case hittable_type::translate:
-                fixed_nodes[i].left.data = &d_translates[
-                    static_cast<translate*>(nodes[i].left.data) - translates];
-                break;
-            case hittable_type::rotate_y:
-                fixed_nodes[i].left.data = &d_rotates[
-                    static_cast<rotate_y*>(nodes[i].left.data) - rotates];
-                break;
-            case hittable_type::hittable_list:
-                fixed_nodes[i].left.data = &d_lists[
-                    static_cast<gpu_hittable_list*>(nodes[i].left.data) - lists];
-                break;
-            default:
-                printf("BVH left.type=%d unhandled in copy_scene_to_gpu!\n", (int)fixed_nodes[i].left.type);
-                fixed_nodes[i].left.data = nullptr; // crash safe but visible
-                break;
-        }
-        if (fixed_nodes[i].left.data == nullptr) {
-            printf("WARNING: BVH node %d left.data is null! left.type=%d\n", i, (int)fixed_nodes[i].left.type);
-        }
-        
-
-        switch (fixed_nodes[i].right.type) {
-            case hittable_type::sphere:
-                fixed_nodes[i].right.data = &d_spheres[
-                    static_cast<gpu_sphere*>(nodes[i].right.data) - spheres];
-                break;
-            case hittable_type::quad:
-                fixed_nodes[i].right.data = &d_quads[
-                    static_cast<quad*>(nodes[i].right.data) - quads];
-                break;
-            case hittable_type::bvh_node:
-                fixed_nodes[i].right.data = &d_nodes[
-                    static_cast<bvh_node*>(nodes[i].right.data) - nodes];
-                break;
-            case hittable_type::translate:
-                fixed_nodes[i].right.data = &d_translates[
-                    static_cast<translate*>(nodes[i].right.data) - translates];
-                break;
-            case hittable_type::rotate_y:
-                fixed_nodes[i].right.data = &d_rotates[
-                    static_cast<rotate_y*>(nodes[i].right.data) - rotates];
-                break;
-            case hittable_type::hittable_list:
-                fixed_nodes[i].right.data = &d_lists[
-                    static_cast<gpu_hittable_list*>(nodes[i].right.data) - lists];
-                break;
-            default:
-                printf("BVH right.type=%d unhandled in copy_scene_to_gpu!\n", (int)fixed_nodes[i].right.type);
-                fixed_nodes[i].right.data = nullptr; // crash safe but visible
-                break;
-        }
-        if (fixed_nodes[i].right.data == nullptr) {
-            printf("WARNING: BVH node %d left.data is null! left.type=%d\n", i, (int)fixed_nodes[i].left.type);
-        }
-        if (fixed_nodes[i].left.data == &d_nodes[i]) {
-            printf("WARNING: BVH node %d left points to itself!\n", i);
-        }
-        if (fixed_nodes[i].right.data == &d_nodes[i]) {
-            printf("WARNING: BVH node %d right points to itself!\n", i);
-        }
-    }
-
-    cudaMemcpy(d_nodes, fixed_nodes, node_count * sizeof(bvh_node), cudaMemcpyHostToDevice);
-    delete[] fixed_nodes;
-
-    // === Fix materials (internal data pointers) ===
+    // --- Upload and fix materials ---
     material* fixed_materials = new material[material_count];
     for (int i = 0; i < material_count; ++i) {
         fixed_materials[i] = materials[i];
-        switch (fixed_materials[i].type) {
-            case material_type::lambertian:
-                fixed_materials[i].data = &d_lambertians[
-                    static_cast<lambertian*>(materials[i].data) - lambertians];
-                break;
-            case material_type::diffuse_light:
-                fixed_materials[i].data = &d_lights[
-                    static_cast<diffuse_light*>(materials[i].data) - lights];
-                break;
-            // Add other material types here if needed
-        }
+        if (materials[i].type == material_type::lambertian)
+            fixed_materials[i].data = &d_lambertians[static_cast<lambertian*>(materials[i].data) - lambertians];
+        else if (materials[i].type == material_type::diffuse_light)
+            fixed_materials[i].data = &d_lights[static_cast<diffuse_light*>(materials[i].data) - lights];
     }
-    cudaMemcpy(d_materials, fixed_materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
+    material* d_materials = upload_array_to_gpu(fixed_materials, material_count);
     delete[] fixed_materials;
 
-    // === Fix gpu_sphere mat_ptrs ===
+    // --- Upload and fix spheres ---
     gpu_sphere* fixed_spheres = new gpu_sphere[sphere_count];
     for (int i = 0; i < sphere_count; ++i) {
         fixed_spheres[i] = spheres[i];
         fixed_spheres[i].mat_ptr = &d_materials[spheres[i].mat_ptr - materials];
     }
-    cudaMemcpy(d_spheres, fixed_spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
+    gpu_sphere* d_spheres = upload_array_to_gpu(fixed_spheres, sphere_count);
     delete[] fixed_spheres;
 
-    // === Fix quad mat_ptrs ===
+    // --- Upload and fix quads ---
     quad* fixed_quads = new quad[quad_count];
     for (int i = 0; i < quad_count; ++i) {
         fixed_quads[i] = quads[i];
         fixed_quads[i].mat_ptr = &d_materials[quads[i].mat_ptr - materials];
     }
-    cudaMemcpy(d_quads, fixed_quads, quad_count * sizeof(quad), cudaMemcpyHostToDevice);
+    quad* d_quads = upload_array_to_gpu(fixed_quads, quad_count);
     delete[] fixed_quads;
 
-    // === Fix hittable ptrs ===
+    // --- Upload and fix BVH nodes ---
+    bvh_node* fixed_nodes = new bvh_node[node_count];
+    for (int i = 0; i < node_count; ++i) {
+        fixed_nodes[i] = nodes[i];
+        auto fix = [&](hittable& h) {
+            switch (h.type) {
+                case hittable_type::sphere: h.data = &d_spheres[static_cast<gpu_sphere*>(h.data) - spheres]; break;
+                case hittable_type::quad: h.data = &d_quads[static_cast<quad*>(h.data) - quads]; break;
+                case hittable_type::bvh_node: h.data = &fixed_nodes[static_cast<bvh_node*>(h.data) - nodes]; break;
+                case hittable_type::translate: h.data = &d_translates[static_cast<translate*>(h.data) - translates]; break;
+                case hittable_type::rotate_y: h.data = &d_rotates[static_cast<rotate_y*>(h.data) - rotates]; break;
+                case hittable_type::hittable_list: h.data = &d_lists[static_cast<gpu_hittable_list*>(h.data) - lists]; break;
+                default: h.data = nullptr; break;
+            }
+        };
+        fix(fixed_nodes[i].left);
+        fix(fixed_nodes[i].right);
+    }
+    bvh_node* d_nodes = upload_array_to_gpu(fixed_nodes, node_count);
+    delete[] fixed_nodes;
+
+    // --- Upload and fix hittables ---
     hittable* fixed_objects = new hittable[object_count];
     for (int i = 0; i < object_count; ++i) {
         fixed_objects[i] = objects[i];
-        switch (fixed_objects[i].type) {
-            case hittable_type::sphere:
-                fixed_objects[i].data = &d_spheres[
-                    static_cast<gpu_sphere*>(objects[i].data) - spheres];
-                break;
-            case hittable_type::quad:
-                fixed_objects[i].data = &d_quads[
-                    static_cast<quad*>(objects[i].data) - quads];
-                break;
-            // Add other hittable types if needed
-        }
+        if (objects[i].type == hittable_type::sphere)
+            fixed_objects[i].data = &d_spheres[static_cast<gpu_sphere*>(objects[i].data) - spheres];
+        else if (objects[i].type == hittable_type::quad)
+            fixed_objects[i].data = &d_quads[static_cast<quad*>(objects[i].data) - quads];
     }
-    cudaMemcpy(d_objects, fixed_objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
+    hittable* d_objects = upload_array_to_gpu(fixed_objects, object_count);
     delete[] fixed_objects;
 
-    // === Build and return the top-level world pointer ===
+    // --- Build final world root ---
     hittable world_gpu = { hittable_type::bvh_node, &d_nodes[root_index] };
-    hittable* d_world;
-    cudaMalloc(&d_world, sizeof(hittable));
-    cudaMemcpy(d_world, &world_gpu, sizeof(hittable), cudaMemcpyHostToDevice);
+    hittable* d_world = upload_array_to_gpu(&world_gpu, 1);
+
+    printf("copy_scene_to_gpu() completed successfully\n");
 
     return d_world;
 }
+
 
 
 inline void create_box(

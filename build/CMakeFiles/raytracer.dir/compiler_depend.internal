@@ -306,6 +306,7 @@ CMakeFiles/raytracer.dir/src/gpu/render.cu.o
  /home/christianw/raytracer-cuda/include/raytracer/camera_data.h
  /home/christianw/raytracer-cuda/include/raytracer/color.h
  /home/christianw/raytracer-cuda/include/raytracer/cuda_compat.h
+ /home/christianw/raytracer-cuda/include/raytracer/cuda_utils.h
  /home/christianw/raytracer-cuda/include/raytracer/device_ray_color.h
  /home/christianw/raytracer-cuda/include/raytracer/hittable.h
  /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h
