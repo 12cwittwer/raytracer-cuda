@@ -48,8 +48,6 @@ __global__ void render_kernel(
     curandState rng;
     curand_init(1984 + pixel_index, 0, 0, &rng);
 
-    printf("Getting past random");
-
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
         if (x == 0 && y == 0) {
@@ -66,7 +64,7 @@ __global__ void render_kernel(
         }
         pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
     }
-
+    printf("Writing to framebuffer");
     framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
 }
 
