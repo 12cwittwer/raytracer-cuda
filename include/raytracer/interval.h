@@ -11,7 +11,9 @@ class interval {
         : min(+infinity), max(-infinity) {} // Default = empty
 
     __host__ __device__ interval(double min, double max)
-        : min(min), max(max) {}
+        : min(min), max(max) {
+            printf("Interval successfully called\n");
+        }
 
     __host__ __device__ interval(const interval& a, const interval& b) {
         min = a.min <= b.min ? a.min : b.min;
