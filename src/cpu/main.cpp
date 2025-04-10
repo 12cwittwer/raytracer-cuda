@@ -59,10 +59,9 @@ hittable* copy_scene_to_gpu(
                 fixed_nodes[i].left.data = &d_nodes[
                     static_cast<bvh_node*>(nodes[i].left.data) - nodes];
                 break;
-            case hittable_type::translate:
-            case hittable_type::rotate_y:
-            case hittable_type::hittable_list:
-                // Add handling if your scene uses these
+            default:
+                printf("BVH left.type=%d unhandled in copy_scene_to_gpu!\n", (int)fixed_nodes[i].left.type);
+                fixed_nodes[i].left.data = nullptr; // crash safe but visible
                 break;
         }
 
@@ -79,10 +78,9 @@ hittable* copy_scene_to_gpu(
                 fixed_nodes[i].right.data = &d_nodes[
                     static_cast<bvh_node*>(nodes[i].right.data) - nodes];
                 break;
-            case hittable_type::translate:
-            case hittable_type::rotate_y:
-            case hittable_type::hittable_list:
-                // Add handling if your scene uses these
+            default:
+                printf("BVH left.type=%d unhandled in copy_scene_to_gpu!\n", (int)fixed_nodes[i].left.type);
+                fixed_nodes[i].left.data = nullptr; // crash safe but visible
                 break;
         }
     }
