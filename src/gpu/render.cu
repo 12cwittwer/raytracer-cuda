@@ -57,16 +57,16 @@ __global__ void render_kernel(
             printf("cam->background=(%f, %f, %f)\n",
                 cam->background.x(), cam->background.y(), cam->background.z());
         }
-        printf("Getting Ray");
+        printf("Getting Ray\n");
         ray r = get_ray(cam, x, y, &rng);
-        printf("Got Ray");
+        printf("Got Ray\n");
         if (world->data == nullptr) {
             if (x == 0 && y == 0) printf("CRASH PREVENTED: world->data was null\n");
             return;
         }
-        printf("Calling Ray Color");
+        printf("Calling Ray Color\n");
         pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
-        printf("Ray color Successfully returned");
+        printf("Ray color Successfully returned\n");
     }
     framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
 }

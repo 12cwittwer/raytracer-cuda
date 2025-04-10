@@ -12,16 +12,21 @@ __device__ color ray_color(
     color background,
     curandState rng
 ) {
-    printf("Ray color successfully called");
+    printf("Ray color successfully called\n");
+
+    printf("Checking Depth\n");
     if (depth <= 0)
         return color(0, 0, 0);
+    printf("Depth Checked\n");
         
+    printf("Creating Interval\n");
     hit_record rec;
     interval t_range(0.001, infinity);
+    printf("Interval Created\n");
 
-    printf("Going into hit hittable");
+    printf("Going into hit hittable\n");
     rec = hit_hittable(*world, r, t_range, rec);
-    printf("Returned from hit hittable");
+    printf("Returned from hit hittable\n");
 
     if (!rec.hit)
         return background;
