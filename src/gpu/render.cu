@@ -38,7 +38,7 @@ __global__ void render_kernel(
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
         if (x == 0 && y == 0) {
-                cam->background.x(), cam->background.y(), cam->background.z());
+                cam->background.x(), cam->background.y(), cam->background.z();
         }
 
         ray r = get_ray(cam, x, y, &rng);
