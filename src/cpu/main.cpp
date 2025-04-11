@@ -1235,9 +1235,8 @@ void smol_diffuse() {
     const int max_diffuse_lights = 1;
     const int max_materials = 2;
     const int max_spheres = 2;
-    const int max_objects = 2;
-
-    // === Host-side arrays ===
+    const int max_objects = 2;  // For hittable_list
+     
     lambertian* lambertians = new lambertian[max_lambertians];
     diffuse_light* diffuse_lights = new diffuse_light[max_diffuse_lights];
     material* materials = new material[max_materials];
@@ -1250,64 +1249,51 @@ void smol_diffuse() {
     int sphere_count = 0;
     int object_count = 0;
 
-    // === Build scene ===
     lambertians[lambertian_count++] = lambertian{color(0.8, 0.3, 0.3)};
-    diffuse_lights[diffuse_light_count++] = diffuse_light{color(4.0, 4.0, 4.0)}; // bright light
+    diffuse_lights[diffuse_light_count++] = diffuse_light{color(4.0, 4.0, 4.0)};
 
-    // Material 0: Lambertian
-    materials[material_count++] = material{
-        material_type::lambertian,
-        nullptr  // will point to d_lambertians
-    };
+    materials[material_count++] = material{material_type::lambertian, nullptr};
+    materials[material_count++] = material{material_type::diffuse_light, nullptr};
 
-    // Material 1: Diffuse Light
-    materials[material_count++] = material{
-        material_type::diffuse_light,
-        nullptr  // will point to d_diffuse_lights
-    };
-
-    // Sphere 0: Lambertian Sphere
     spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
-
-    // Sphere 1: Diffuse Light Sphere
     spheres[sphere_count++] = gpu_sphere(point3(1, 0, -10), 0.5, nullptr);
 
-    objects[object_count++] = hittable{hittable_type::sphere, nullptr};
-    objects[object_count++] = hittable{hittable_type::sphere, nullptr};
+    objects[object_count++] = hittable{hittable_type::sphere, nullptr};  // sphere 0
+    objects[object_count++] = hittable{hittable_type::sphere, nullptr};  // sphere 1
 
-    // === Allocate device memory ===
+    // Device pointers
     lambertian* d_lambertians;
     diffuse_light* d_diffuse_lights;
     material* d_materials;
     gpu_sphere* d_spheres;
     hittable* d_objects;
+    hittable_list* d_world;
 
     cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
     cudaMalloc(&d_diffuse_lights, diffuse_light_count * sizeof(diffuse_light));
     cudaMalloc(&d_materials, material_count * sizeof(material));
     cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
     cudaMalloc(&d_objects, object_count * sizeof(hittable));
+    cudaMalloc(&d_world, sizeof(hittable_list));
 
-    // === Copy to device ===
     cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice);
     cudaMemcpy(d_diffuse_lights, diffuse_lights, diffuse_light_count * sizeof(diffuse_light), cudaMemcpyHostToDevice);
 
     materials[0].data = d_lambertians;
     materials[1].data = d_diffuse_lights;
-
     cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
 
-    spheres[0].mat_ptr = d_materials + 0; // lambertian
-    spheres[1].mat_ptr = d_materials + 1; // diffuse_light
-
+    spheres[0].mat_ptr = d_materials + 0;
+    spheres[1].mat_ptr = d_materials + 1;
     cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
 
     objects[0].data = d_spheres + 0;
     objects[1].data = d_spheres + 1;
-
     cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
 
-    // === Camera ===
+    hittable_list world{d_objects, object_count};
+    cudaMemcpy(d_world, &world, sizeof(hittable_list), cudaMemcpyHostToDevice);
+
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
@@ -1321,14 +1307,14 @@ void smol_diffuse() {
     cam.defocus_angle = 0;
 
     CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
-    cam.render_gpu(d_objects);
+    cam.render_gpu(reinterpret_cast<hittable*>(d_world));  // Treat hittable_list as hittable*
 
-    // === Cleanup ===
     cudaFree(d_lambertians);
     cudaFree(d_diffuse_lights);
     cudaFree(d_materials);
     cudaFree(d_spheres);
     cudaFree(d_objects);
+    cudaFree(d_world);
 
     delete[] lambertians;
     delete[] diffuse_lights;
@@ -1336,6 +1322,7 @@ void smol_diffuse() {
     delete[] spheres;
     delete[] objects;
 }
+
 
 
 int main() {
