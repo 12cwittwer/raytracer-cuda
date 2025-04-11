@@ -1035,7 +1035,7 @@ void my_scene() {
     cam.image_width = 400;
     cam.samples_per_pixel = 5;
     cam.max_depth = 5;
-    cam.background = color(20, 20, 20);
+    cam.background = color(0, 0, 0);
 
     cam.vfov = 20;
     cam.lookfrom = point3(26, 3, 6);
@@ -1059,10 +1059,7 @@ void my_scene() {
     );
 
     // === Render ===
-    size_t free_mem, total_mem;
-    cudaMemGetInfo(&free_mem, &total_mem);
-    printf("Free mem: %zu bytes, Total mem: %zu bytes\n", free_mem, total_mem);
-    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 20480));
     cam.render_gpu(d_world);
 
     // === Cleanup ===
