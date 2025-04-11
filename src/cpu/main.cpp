@@ -1073,56 +1073,61 @@ void my_scene() {
 }
 
 void small_boi() {
-    // Scene config
-    const int num_lambertians = 1;
-    const int num_materials   = 1;
-    const int num_spheres     = 1;
-    const int num_objects     = 1;
+    const int max_lambertians = 1;
+    const int max_spheres = 1;
+    const int max_materials = 1;
+    const int max_objects = 1;
 
-    // Host-side arrays
-    lambertian* lambertians = new lambertian[num_lambertians];
-    material* materials     = new material[num_materials];
-    gpu_sphere* spheres     = new gpu_sphere[num_spheres];
-    hittable* objects       = new hittable[num_objects];
+    // === Host-side arrays ===
+    lambertian* lambertians = new lambertian[max_lambertians];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
 
-    // === Initialize data ===
+    int lambertian_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int object_count = 0;
 
-    // Lambertian material
-    lambertians[0] = lambertian{ color(0.8, 0.3, 0.3) };
+    // === Build scene ===
+    lambertians[lambertian_count++] = lambertian{color(0.8, 0.3, 0.3)};
 
-    // GPU pointers (device allocations)
+    materials[material_count++] = material{
+        material_type::lambertian,
+        nullptr  // fix later
+    };
+
+    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
+
+    objects[object_count++] = hittable{
+        hittable_type::sphere,
+        nullptr  // fix later
+    };
+
+    // === Allocate device memory ===
     lambertian* d_lambertians;
     material* d_materials;
     gpu_sphere* d_spheres;
     hittable* d_objects;
 
-    CUDA_CHECK(cudaMalloc(&d_lambertians, num_lambertians * sizeof(lambertian)));
-    CUDA_CHECK(cudaMalloc(&d_materials, num_materials * sizeof(material)));
-    CUDA_CHECK(cudaMalloc(&d_spheres, num_spheres * sizeof(gpu_sphere)));
-    CUDA_CHECK(cudaMalloc(&d_objects, num_objects * sizeof(hittable)));
+    cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
+    cudaMalloc(&d_materials, material_count * sizeof(material));
+    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
+    cudaMalloc(&d_objects, object_count * sizeof(hittable));
 
-    // Copy lambertian to device
-    CUDA_CHECK(cudaMemcpy(d_lambertians, lambertians, sizeof(lambertian), cudaMemcpyHostToDevice));
+    // === Copy raw ===
+    cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice);
+    materials[0].data = d_lambertians;
 
-    // Material points to device lambertian
-    materials[0] = material{
-        material_type::lambertian,
-        d_lambertians
-    };
+    cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
+    spheres[0].mat_ptr = d_materials;
 
-    CUDA_CHECK(cudaMemcpy(d_materials, materials, sizeof(material), cudaMemcpyHostToDevice));
+    cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
+    objects[0].data = d_spheres;
 
-    // Sphere uses device material ptr
-    spheres[0] = gpu_sphere(point3(0, 0, -10), 0.5, d_materials);
+    cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
 
-    CUDA_CHECK(cudaMemcpy(d_spheres, spheres, sizeof(gpu_sphere), cudaMemcpyHostToDevice));
-
-    // Hittable uses device sphere ptr
-    objects[0] = hittable{ hittable_type::sphere, d_spheres };
-
-    CUDA_CHECK(cudaMemcpy(d_objects, objects, sizeof(hittable), cudaMemcpyHostToDevice));
-
-    // === Setup camera ===
+    // === Camera ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
@@ -1135,24 +1140,21 @@ void small_boi() {
     cam.vup = vec3(0, 1, 0);
     cam.defocus_angle = 0;
 
-    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
-
+    // === Render using real GPU pointers ===
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384)); // or higher
     cam.render_gpu(d_objects);
 
-    // === Cleanup device memory ===
-    CUDA_CHECK(cudaFree(d_lambertians));
-    CUDA_CHECK(cudaFree(d_materials));
-    CUDA_CHECK(cudaFree(d_spheres));
-    CUDA_CHECK(cudaFree(d_objects));
+    // === Cleanup ===
+    cudaFree(d_lambertians);
+    cudaFree(d_materials);
+    cudaFree(d_spheres);
+    cudaFree(d_objects);
 
-    // Cleanup host memory
     delete[] lambertians;
     delete[] materials;
     delete[] spheres;
     delete[] objects;
 }
-
-
 
 
 void sboi() {
