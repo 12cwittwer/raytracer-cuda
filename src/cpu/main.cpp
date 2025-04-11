@@ -1236,7 +1236,7 @@ void sboi() {
 
 
 int main() {
-    switch (10) {
+    switch (9) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;
