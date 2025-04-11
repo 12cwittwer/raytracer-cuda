@@ -1230,7 +1230,7 @@ void sboi() {
     free(d_objects);
 }
 
-void small_diffuse() {
+void smol_diffuse() {
     const int max_lambertians = 1;
     const int max_diffuse_lights = 1;
     const int max_materials = 2;
@@ -1351,7 +1351,7 @@ int main() {
         case 9: my_scene();     break;
         case 10: small_boi();   break;
         case 11: sboi();        break;
-        case 12: small_diffuse()break;
+        case 12: smol_diffuse();break;
     }
 
     return 0;
