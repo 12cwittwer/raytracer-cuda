@@ -50,6 +50,10 @@ __device__ inline bool scatter_material(
     ray& scattered,
     curandState* rng
 ) {
+    if (mat.data == nullptr) {
+        printf("BAD MATERIAL DATA POINTER\n");
+        return false;
+    }
     switch (mat.type) {
         case material_type::lambertian: {
             const lambertian* lam = reinterpret_cast<const lambertian*>(mat.data);
