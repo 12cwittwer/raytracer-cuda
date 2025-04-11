@@ -1033,8 +1033,8 @@ void my_scene() {
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
-    cam.samples_per_pixel = 100;
-    cam.max_depth = 50;
+    cam.samples_per_pixel = 5;
+    cam.max_depth = 5;
     cam.background = color(20, 20, 20);
 
     cam.vfov = 20;
