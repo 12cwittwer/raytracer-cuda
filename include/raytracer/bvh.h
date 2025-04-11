@@ -12,31 +12,31 @@ struct bvh_node {
     aabb bbox;
 
     __host__ __device__
-    hit_record hit(const ray& r, interval ray_t) const {
-        hit_record rec;
-        rec.hit = false;
+    void hit(const ray& r, interval ray_t, hit_record& rec) const {
 
         if (left.data == nullptr) {
             rec.hit = false;
-            return rec;
+            return;
         }
         if (right.data == nullptr) {
             rec.hit = false;
-            return rec;
+            return;
         }
      
-        if (!bbox.hit(r, ray_t)) return rec;
+        if (!bbox.hit(r, ray_t)) return;
 
-        hit_record left_rec = hit_hittable(left, r, ray_t, rec);
-        hit_record right_rec = hit_hittable(right, r, interval(ray_t.min, left_rec.hit ? left_rec.t : ray_t.max), rec);
+        hit_record temp_rec;
 
-        if (left_rec.hit && (!right_rec.hit || left_rec.t < right_rec.t)) {
-            return left_rec;
-        } else if (right_rec.hit) {
-            return right_rec;
+        hit_hittable(right, r, ray_t, temp_rec);
+        if (temp_rec.hit) {
+            ray_t.max = temp_rec.t;
+            rec = temp_rec;
         }
 
-        return rec;
+        hit_hittable(left, r, ray_t, temp_rec);
+        if (temp_rec.hit) {
+            rec = temp_rec;
+        }
     }
 };
 

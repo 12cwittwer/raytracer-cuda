@@ -159,7 +159,7 @@ class camera {
             return color(0,0,0);
 
         hit_record rec;
-        rec = hit_hittable(world, r, interval(0.001, infinity), rec);
+        hit_hittable(world, r, interval(0.001, infinity), rec);
 
         if (!rec.hit) {
             return background;
