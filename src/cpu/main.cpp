@@ -1230,10 +1230,116 @@ void sboi() {
     free(d_objects);
 }
 
+void small_diffuse() {
+    const int max_lambertians = 1;
+    const int max_diffuse_lights = 1;
+    const int max_materials = 2;
+    const int max_spheres = 2;
+    const int max_objects = 2;
+
+    // === Host-side arrays ===
+    lambertian* lambertians = new lambertian[max_lambertians];
+    diffuse_light* diffuse_lights = new diffuse_light[max_diffuse_lights];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+
+    int lambertian_count = 0;
+    int diffuse_light_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int object_count = 0;
+
+    // === Build scene ===
+    lambertians[lambertian_count++] = lambertian{color(0.8, 0.3, 0.3)};
+    diffuse_lights[diffuse_light_count++] = diffuse_light{color(4.0, 4.0, 4.0)}; // bright light
+
+    // Material 0: Lambertian
+    materials[material_count++] = material{
+        material_type::lambertian,
+        nullptr  // will point to d_lambertians
+    };
+
+    // Material 1: Diffuse Light
+    materials[material_count++] = material{
+        material_type::diffuse_light,
+        nullptr  // will point to d_diffuse_lights
+    };
+
+    // Sphere 0: Lambertian Sphere
+    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
+
+    // Sphere 1: Diffuse Light Sphere
+    spheres[sphere_count++] = gpu_sphere(point3(1, 0, -10), 0.5, nullptr);
+
+    objects[object_count++] = hittable{hittable_type::sphere, nullptr};
+    objects[object_count++] = hittable{hittable_type::sphere, nullptr};
+
+    // === Allocate device memory ===
+    lambertian* d_lambertians;
+    diffuse_light* d_diffuse_lights;
+    material* d_materials;
+    gpu_sphere* d_spheres;
+    hittable* d_objects;
+
+    cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
+    cudaMalloc(&d_diffuse_lights, diffuse_light_count * sizeof(diffuse_light));
+    cudaMalloc(&d_materials, material_count * sizeof(material));
+    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
+    cudaMalloc(&d_objects, object_count * sizeof(hittable));
+
+    // === Copy to device ===
+    cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_diffuse_lights, diffuse_lights, diffuse_light_count * sizeof(diffuse_light), cudaMemcpyHostToDevice);
+
+    materials[0].data = d_lambertians;
+    materials[1].data = d_diffuse_lights;
+
+    cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
+
+    spheres[0].mat_ptr = d_materials + 0; // lambertian
+    spheres[1].mat_ptr = d_materials + 1; // diffuse_light
+
+    cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
+
+    objects[0].data = d_spheres + 0;
+    objects[1].data = d_spheres + 1;
+
+    cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
+
+    // === Camera ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 5;
+    cam.max_depth = 5;
+    cam.background = color(0.2, 0.2, 0.2);
+    cam.vfov = 20;
+    cam.lookfrom = point3(0, 0, 0);
+    cam.lookat = point3(0, 0, -1);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
+    cam.render_gpu(d_objects);
+
+    // === Cleanup ===
+    cudaFree(d_lambertians);
+    cudaFree(d_diffuse_lights);
+    cudaFree(d_materials);
+    cudaFree(d_spheres);
+    cudaFree(d_objects);
+
+    delete[] lambertians;
+    delete[] diffuse_lights;
+    delete[] materials;
+    delete[] spheres;
+    delete[] objects;
+}
 
 
 int main() {
-    switch (9) {
+    switch (12) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;
@@ -1245,6 +1351,7 @@ int main() {
         case 9: my_scene();     break;
         case 10: small_boi();   break;
         case 11: sboi();        break;
+        case 12: small_diffuse()break;
     }
 
     return 0;
