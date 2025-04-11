@@ -21,34 +21,26 @@
 #include "raytracer/render.h"
 
 
-__global__ void render_kernel(
-    const camera_data* cam,
-    const hittable* world,
-    color* framebuffer
-) {
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
+__global__ void render_kernel(const camera_data* cam, const hittable* world, color* framebuffer) {
+    if (threadIdx.x != 0 || threadIdx.y != 0 || blockIdx.x != 0 || blockIdx.y != 0)
+        return; // Only 1 thread runs
 
-    if (x >= cam->image_width || y >= cam->image_height) return;
+    for (int y = 0; y < cam->image_height; ++y) {
+        for (int x = 0; x < cam->image_width; ++x) {
+            int pixel_index = y * cam->image_width + x;
+            curandState rng;
+            curand_init(1984 + pixel_index, 0, 0, &rng);
 
-    int pixel_index = y * cam->image_width + x;
-    curandState rng;
-    curand_init(1984 + pixel_index, 0, 0, &rng);
+            color pixel_color(0, 0, 0);
 
-    color pixel_color(0, 0, 0);
-    for (int s = 0; s < cam->samples_per_pixel; ++s) {
-        if (x == 0 && y == 0) {
-                cam->background.x(), cam->background.y(), cam->background.z();
+            for (int s = 0; s < cam->samples_per_pixel; ++s) {
+                ray r = get_ray(cam, x, y, &rng);
+                pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
+            }
+
+            framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
         }
-
-        ray r = get_ray(cam, x, y, &rng);
-
-        if (world->data == nullptr) {
-            return;
-        }
-        pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
     }
-    framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
 }
 
 #include "raytracer/cuda_utils.h"  // for CUDA_CHECK
@@ -62,8 +54,8 @@ void launch_render_kernel(const camera_data* cam, const hittable* world, color* 
 
     // Launch kernel
     // Try rendering the first pixel
-    // render_kernel<<<1, 1>>>(cam, world, fb);
-    render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
+    render_kernel<<<1, 1>>>(cam, world, fb);
+    // render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
 
     // Check for immediate kernel launch errors
     CUDA_CHECK(cudaGetLastError());
