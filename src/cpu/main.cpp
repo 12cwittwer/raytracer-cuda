@@ -1059,6 +1059,10 @@ void my_scene() {
     );
 
     // === Render ===
+    size_t free_mem, total_mem;
+    cudaMemGetInfo(&free_mem, &total_mem);
+    printf("Free mem: %zu bytes, Total mem: %zu bytes\n", free_mem, total_mem);
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
     cam.render_gpu(d_world);
 
     // === Cleanup ===
