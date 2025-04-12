@@ -1722,11 +1722,11 @@ void final_sphere() {
     materials[material_count++] = material{material_type::lambertian, nullptr};
 
     spheres[sphere_count++] = gpu_sphere(point3(-1.0, 0, -9), 0.5, nullptr); // glass 1
-    spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -8), 0.8, nullptr); // glass 2
+    spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -8), 0.2, nullptr); // glass 2
     spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -10), 0.5, nullptr);  // metal 1
     spheres[sphere_count++] = gpu_sphere(point3(1.0, 0, -9), 0.5, nullptr);  // metal 2
     spheres[sphere_count++] = gpu_sphere(point3(0, 1.0, -9), 0.5, nullptr);  // lambertian 1
-    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -15), 900, nullptr);  // lambertian 2 (floor)
+    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -15), 898, nullptr);  // lambertian 2 (floor)
 
     for (int i = 0; i < max_objects; i++) {
         objects[object_count++] = hittable{hittable_type::sphere, nullptr};
