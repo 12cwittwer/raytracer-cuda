@@ -1323,6 +1323,90 @@ void smol_diffuse() {
     delete[] objects;
 }
 
+void s_metal() {
+    const int max_metals = 1;
+    const int max_spheres = 1;
+    const int max_materials = 1;
+    const int max_objects = 1;
+
+    // === Host-side arrays ===
+    metal* metals = new metal[max_metals];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+
+    int metal_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int object_count = 0;
+
+    // === Build scene ===
+    metals[metal_count++] = metal{color(0.8, 0.3, 0.3), 0.33};
+
+    materials[material_count++] = material{
+        material_type::metal,
+        nullptr  // fix later
+    };
+
+    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
+
+    objects[object_count++] = hittable{
+        hittable_type::sphere,
+        nullptr  // fix later
+    };
+
+    // === Allocate device memory ===
+    metal* d_metals;
+    material* d_materials;
+    gpu_sphere* d_spheres;
+    hittable* d_objects;
+
+    cudaMalloc(&d_metals, metal_count * sizeof(metal));
+    cudaMalloc(&d_materials, material_count * sizeof(material));
+    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
+    cudaMalloc(&d_objects, object_count * sizeof(hittable));
+
+    // === Copy raw ===
+    cudaMemcpy(d_metals, metals, metal_count * sizeof(metal), cudaMemcpyHostToDevice);
+    materials[0].data = d_metals;
+
+    cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
+    spheres[0].mat_ptr = d_materials;
+
+    cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
+    objects[0].data = d_spheres;
+
+    cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
+
+    // === Camera ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 400;
+    cam.samples_per_pixel = 5;
+    cam.max_depth = 5;
+    cam.background = color(0.2, 0.2, 0.2);
+    cam.vfov = 20;
+    cam.lookfrom = point3(0, 0, 0);
+    cam.lookat = point3(0, 0, -1);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    // === Render using real GPU pointers ===
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384)); // or higher
+    cam.render_gpu(d_objects);
+
+    // === Cleanup ===
+    cudaFree(d_metals);
+    cudaFree(d_materials);
+    cudaFree(d_spheres);
+    cudaFree(d_objects);
+
+    delete[] metals;
+    delete[] materials;
+    delete[] spheres;
+    delete[] objects;
+}
+
 
 
 int main() {
@@ -1338,7 +1422,7 @@ int main() {
         case 9: my_scene();     break;
         case 10: small_boi();   break;
         case 11: sboi();        break;
-        case 12: smol_diffuse();break;
+        case 12: s_metal();     break;
     }
 
     return 0;
