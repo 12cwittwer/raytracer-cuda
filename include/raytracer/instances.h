@@ -29,12 +29,13 @@ inline void hit_gpu_hittable_list(const gpu_hittable_list& list, const ray& r, i
     hit_record temp_rec;
 
     for (int i = 0; i < list.count; i++) {
+        temp_rec = hit_record{};
+
         hit_hittable(list.objects[i], r, ray_t, temp_rec);
 
         if (temp_rec.hit && temp_rec.t < ray_t.max) {
             ray_t.max = temp_rec.t;
             rec = temp_rec;
-            temp_rec.hit = false;
         }
     }
 }

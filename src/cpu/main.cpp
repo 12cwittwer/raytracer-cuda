@@ -1548,7 +1548,7 @@ void two_spheres() {
 
 
 int main() {
-    switch (10) {
+    switch (13) {
         case 1: spheres();      break;
         case 2: quads();        break;
         case 3: light();        break;
