@@ -1408,80 +1408,109 @@ void s_metal() {
 }
 
 void two_spheres() {
-    const int max_metals    = 2;
+    const int max_glass = 1;
+    const int max_metals = 1;
+    const int max_spheres = 2;
     const int max_materials = 2;
-    const int max_spheres   = 2;
-    const int max_objects   = 2;
+    const int max_objects = 2;
+    const int max_hittable_list = 1;
 
     // === Host-side arrays ===
-    metal* metals          = new metal[max_metals];
-    material* materials    = new material[max_materials];
-    gpu_sphere* spheres    = new gpu_sphere[max_spheres];
-    hittable* objects      = new hittable[max_objects];
+    dielectric* glasses = new dielectric[max_glass];
+    metal* metals = new metal[max_metals];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+    gpu_hittable_list* hittable_lists = new gpu_hittable_list[max_hittable_list];
 
-    int metal_count     = 0;
-    int material_count  = 0;
-    int sphere_count    = 0;
-    int object_count    = 0;
+    int glass_count = 0;
+    int metal_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int object_count = 0;
+    int hittable_list_count = 0;
 
-    // === Create metals ===
-    metals[metal_count++] = metal{color(0.8, 0.3, 0.3), 0.33};  // red metal
-    metals[metal_count++] = metal{color(0.3, 0.8, 0.3), 0.05};  // green metal
+    // === Build Scene ===
+    glasses[glass_count++] = dielectric{1.5};
+    metals[metal_count++] = metal{color(0.8, 0.3, 0.3), 0.33};
 
-    // === Create materials ===
-    materials[material_count++] = material{material_type::metal, nullptr};
-    materials[material_count++] = material{material_type::metal, nullptr};
+    materials[material_count++] = material{
+        material_type::dielectric,
+        nullptr  // fix later
+    };
 
-    // === Create spheres ===
-    spheres[sphere_count++] = gpu_sphere(point3(-1, 0, -10), 0.5, nullptr); // left sphere
-    spheres[sphere_count++] = gpu_sphere(point3(1, 0, -10), 0.5, nullptr);  // right sphere
+    materials[material_count++] = material{
+        material_type::metal,
+        nullptr  // fix later
+    };
 
-    // === Create objects ===
-    objects[object_count++] = hittable{hittable_type::sphere, nullptr};
-    objects[object_count++] = hittable{hittable_type::sphere, nullptr};
+    spheres[sphere_count++] = gpu_sphere(point3(1, 0, -10), 0.5, nullptr); // glass
+    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr); // metal
 
-    // === Device pointers ===
+    objects[object_count++] = hittable{
+        hittable_type::sphere,
+        nullptr  // fix later
+    };
+
+    objects[object_count++] = hittable{
+        hittable_type::sphere,
+        nullptr  // fix later
+    };
+
+    hittable_lists[hittable_list_count++] = gpu_hittable_list{nullptr, object_count};
+
+    // === Allocate Device Memory ===
+    dielectric* d_glasses;
     metal* d_metals;
     material* d_materials;
     gpu_sphere* d_spheres;
     hittable* d_objects;
-    gpu_hittable_list* d_list;
-    hittable* d_root;
+    gpu_hittable_list* d_hittable_lists;
 
-    cudaMalloc(&d_metals, metal_count * sizeof(metal));
-    cudaMalloc(&d_materials, material_count * sizeof(material));
-    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
-    cudaMalloc(&d_objects, object_count * sizeof(hittable));
-    cudaMalloc(&d_list, sizeof(gpu_hittable_list));
-    cudaMalloc(&d_root, sizeof(hittable));
+    CUDA_CHECK(cudaMalloc(&d_glasses, glass_count * sizeof(dielectric)));
+    CUDA_CHECK(cudaMalloc(&d_metals, metal_count * sizeof(metal)));
+    CUDA_CHECK(cudaMalloc(&d_materials, material_count * sizeof(material)));
+    CUDA_CHECK(cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere)));
+    CUDA_CHECK(cudaMalloc(&d_objects, object_count * sizeof(hittable)));
+    CUDA_CHECK(cudaMalloc(&d_hittable_lists, hittable_list_count * sizeof(gpu_hittable_list)));
 
-    // === Copy metals early ===
-    cudaMemcpy(d_metals, metals, metal_count * sizeof(metal), cudaMemcpyHostToDevice);
-    materials[0].data = &d_metals[0];
-    materials[1].data = &d_metals[1];
+    // === Copy Materials ===
+    CUDA_CHECK(cudaMemcpy(d_glasses, glasses, glass_count * sizeof(dielectric), cudaMemcpyHostToDevice));
+    materials[0].data = reinterpret_cast<void*>(d_glasses);
 
-    // === Copy materials early ===
-    cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
-    spheres[0].mat_ptr = &d_materials[0];
-    spheres[1].mat_ptr = &d_materials[1];
+    CUDA_CHECK(cudaMemcpy(d_metals, metals, metal_count * sizeof(metal), cudaMemcpyHostToDevice));
+    materials[1].data = reinterpret_cast<void*>(d_metals);
 
-    // === Copy spheres ===
-    cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
-    objects[0].data = &d_spheres[0];
-    objects[1].data = &d_spheres[1];
+    CUDA_CHECK(cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice));
 
-    // === Copy objects ===
-    cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
+    // === Copy Spheres with material pointers ===
+    spheres[0].mat_ptr = d_materials + 0;  // glass
+    spheres[1].mat_ptr = d_materials + 1;  // metal
 
-    // === Create and copy hittable_list ===
-    gpu_hittable_list hlist{d_objects, object_count};
-    cudaMemcpy(d_list, &hlist, sizeof(gpu_hittable_list), cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice));
 
-    // === Create and copy root hittable ===
-    hittable root{hittable_type::hittable_list, d_list};
-    cudaMemcpy(d_root, &root, sizeof(hittable), cudaMemcpyHostToDevice);
+    // === Copy Hittables with sphere pointers ===
+    objects[0].data = reinterpret_cast<void*>(d_spheres + 0);
+    objects[1].data = reinterpret_cast<void*>(d_spheres + 1);
 
-    // === Setup camera ===
+    CUDA_CHECK(cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice));
+
+    // === Copy Hittable List with objects pointer ===
+    hittable_lists[0].objects = d_objects;
+
+    CUDA_CHECK(cudaMemcpy(d_hittable_lists, hittable_lists, hittable_list_count * sizeof(gpu_hittable_list), cudaMemcpyHostToDevice));
+
+    // === World ===
+    hittable world = hittable{
+        hittable_type::hittable_list,
+        reinterpret_cast<void*>(d_hittable_lists)
+    };
+
+    hittable* d_world;
+    CUDA_CHECK(cudaMalloc(&d_world, sizeof(hittable)));
+    CUDA_CHECK(cudaMemcpy(d_world, &world, sizeof(hittable), cudaMemcpyHostToDevice));
+
+    // === Camera Setup ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
@@ -1495,21 +1524,27 @@ void two_spheres() {
     cam.defocus_angle = 0;
 
     CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
-    cam.render_gpu(d_root);
 
-    // === Cleanup ===
+    cam.render_gpu(d_world);
+
+    // === Cleanup Device ===
+    cudaFree(d_glasses);
     cudaFree(d_metals);
     cudaFree(d_materials);
     cudaFree(d_spheres);
     cudaFree(d_objects);
-    cudaFree(d_list);
-    cudaFree(d_root);
+    cudaFree(d_hittable_lists);
+    cudaFree(d_world);
 
+    // === Cleanup Host ===
+    delete[] glasses;
     delete[] metals;
     delete[] materials;
     delete[] spheres;
     delete[] objects;
+    delete[] hittable_lists;
 }
+
 
 
 int main() {
