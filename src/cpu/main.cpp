@@ -1080,81 +1080,74 @@ void small_boi() {
 
     // === Host-side arrays ===
     lambertian* lambertians = new lambertian[max_lambertians];
-    material* materials = new material[max_materials];
-    gpu_sphere* spheres = new gpu_sphere[max_spheres];
-    hittable* objects = new hittable[max_objects];
+    material* materials     = new material[max_materials];
+    gpu_sphere* spheres     = new gpu_sphere[max_spheres];
+    hittable* objects       = new hittable[max_objects];
 
-    int lambertian_count = 0;
-    int material_count = 0;
-    int sphere_count = 0;
-    int object_count = 0;
+    // === Build Scene ===
+    lambertians[0] = lambertian{ color(0.8, 0.3, 0.3) };
+    materials[0]   = material{ material_type::lambertian, nullptr };
+    spheres[0]     = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
+    objects[0]     = hittable{ hittable_type::sphere, nullptr };
 
-    // === Build scene ===
-    lambertians[lambertian_count++] = lambertian{color(0.8, 0.3, 0.3)};
-
-    materials[material_count++] = material{
-        material_type::lambertian,
-        nullptr  // fix later
-    };
-
-    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -10), 0.5, nullptr);
-
-    objects[object_count++] = hittable{
-        hittable_type::sphere,
-        nullptr  // fix later
-    };
-
-    // === Allocate device memory ===
+    // === Allocate Device Memory ===
     lambertian* d_lambertians;
-    material* d_materials;
+    material*   d_materials;
     gpu_sphere* d_spheres;
-    hittable* d_objects;
+    hittable*   d_objects;
 
-    cudaMalloc(&d_lambertians, lambertian_count * sizeof(lambertian));
-    cudaMalloc(&d_materials, material_count * sizeof(material));
-    cudaMalloc(&d_spheres, sphere_count * sizeof(gpu_sphere));
-    cudaMalloc(&d_objects, object_count * sizeof(hittable));
+    CUDA_CHECK(cudaMalloc(&d_lambertians, sizeof(lambertian)));
+    CUDA_CHECK(cudaMalloc(&d_materials,   sizeof(material)));
+    CUDA_CHECK(cudaMalloc(&d_spheres,     sizeof(gpu_sphere)));
+    CUDA_CHECK(cudaMalloc(&d_objects,     sizeof(hittable)));
 
-    // === Copy raw ===
-    cudaMemcpy(d_lambertians, lambertians, lambertian_count * sizeof(lambertian), cudaMemcpyHostToDevice);
+    // === Upload Raw Data ===
+    CUDA_CHECK(cudaMemcpy(d_lambertians, lambertians, sizeof(lambertian), cudaMemcpyHostToDevice));
+
+    CUDA_CHECK(cudaMemcpy(d_materials,   materials,   sizeof(material),   cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_spheres,     spheres,     sizeof(gpu_sphere), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_objects,     objects,     sizeof(hittable),   cudaMemcpyHostToDevice));
+
+    // === Fix Material & Object Pointers ===
     materials[0].data = d_lambertians;
-
-    cudaMemcpy(d_materials, materials, material_count * sizeof(material), cudaMemcpyHostToDevice);
     spheres[0].mat_ptr = d_materials;
-
-    cudaMemcpy(d_spheres, spheres, sphere_count * sizeof(gpu_sphere), cudaMemcpyHostToDevice);
     objects[0].data = d_spheres;
 
-    cudaMemcpy(d_objects, objects, object_count * sizeof(hittable), cudaMemcpyHostToDevice);
+    // === Upload Fixed Structs ===
+    CUDA_CHECK(cudaMemcpy(d_materials, materials, sizeof(material), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_spheres,   spheres,   sizeof(gpu_sphere), cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_objects,   objects,   sizeof(hittable),   cudaMemcpyHostToDevice));
 
-    // === Camera ===
+    // === Camera Setup ===
     camera cam;
-    cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 400;
-    cam.samples_per_pixel = 5;
-    cam.max_depth = 5;
-    cam.background = color(0.2, 0.2, 0.2);
-    cam.vfov = 20;
-    cam.lookfrom = point3(0, 0, 0);
-    cam.lookat = point3(0, 0, -1);
-    cam.vup = vec3(0, 1, 0);
-    cam.defocus_angle = 0;
+    cam.aspect_ratio       = 16.0 / 9.0;
+    cam.image_width        = 400;
+    cam.samples_per_pixel  = 5;
+    cam.max_depth          = 5;
+    cam.background         = color(0.2, 0.2, 0.2);
+    cam.vfov               = 20;
+    cam.lookfrom           = point3(0, 0, 0);
+    cam.lookat             = point3(0, 0, -1);
+    cam.vup                = vec3(0, 1, 0);
+    cam.defocus_angle      = 0;
 
-    // === Render using real GPU pointers ===
-    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384)); // or higher
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
+
+    // === Render ===
     cam.render_gpu(d_objects);
 
     // === Cleanup ===
-    cudaFree(d_lambertians);
-    cudaFree(d_materials);
-    cudaFree(d_spheres);
-    cudaFree(d_objects);
+    CUDA_CHECK(cudaFree(d_lambertians));
+    CUDA_CHECK(cudaFree(d_materials));
+    CUDA_CHECK(cudaFree(d_spheres));
+    CUDA_CHECK(cudaFree(d_objects));
 
     delete[] lambertians;
     delete[] materials;
     delete[] spheres;
     delete[] objects;
 }
+
 
 
 void sboi() {
