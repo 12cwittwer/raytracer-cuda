@@ -1514,8 +1514,8 @@ void two_spheres() {
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
-    cam.samples_per_pixel = 5;
-    cam.max_depth = 5;
+    cam.samples_per_pixel = 1;
+    cam.max_depth = 3;
     cam.background = color(0.2, 0.2, 0.2);
     cam.vfov = 20;
     cam.lookfrom = point3(0, 0, 0);
@@ -1523,7 +1523,7 @@ void two_spheres() {
     cam.vup = vec3(0, 1, 0);
     cam.defocus_angle = 0;
 
-    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 16384));
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 500000));
 
     cam.render_gpu(d_world);
 
