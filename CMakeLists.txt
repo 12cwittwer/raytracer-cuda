@@ -2,27 +2,28 @@ cmake_minimum_required(VERSION 3.18)
 
 project(raytracer LANGUAGES CXX CUDA)
 
+# Find MPI
+find_package(MPI REQUIRED)
+
+# Find CUDA
 find_package(CUDA REQUIRED)
 
-include_directories(
-    ${CUDA_INCLUDE_DIRS}
-)
-
+# Set Standards
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
+# Enable CUDA
 enable_language(CUDA)
 
-# Enable relaxed constexpr for CUDA
+# CUDA specific flags
 add_compile_options("$<$<COMPILE_LANGUAGE:CUDA>:--expt-relaxed-constexpr>")
 
-# === CUDA Debug Flags for cuda-gdb ===
+# Debug options
 set(CMAKE_BUILD_TYPE Debug)
 
-# Add device-side debug info, host-side debug info, and line info for cuda-gdb
 set(CMAKE_CUDA_FLAGS_DEBUG "-G -O0 -g -lineinfo")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 
@@ -33,9 +34,21 @@ add_executable(raytracer
     src/common/utils.inl
 )
 
-target_include_directories(raytracer PRIVATE include/)
+# Include paths
+target_include_directories(raytracer PRIVATE
+    include/
+    ${CUDA_INCLUDE_DIRS}
+    ${MPI_INCLUDE_PATH}
+)
 
+# Link Libraries
+target_link_libraries(raytracer PRIVATE
+    ${CUDA_LIBRARIES}
+    MPI::MPI_CXX
+)
+
+# CUDA Properties
 set_target_properties(raytracer PROPERTIES
     CUDA_SEPARABLE_COMPILATION ON
-    CUDA_ARCHITECTURES "53"  # Update to match your GPU
+    CUDA_ARCHITECTURES "53"  # Adjust for Jetson (53 = Maxwell, 72 = Xavier, 87 = Orin)
 )

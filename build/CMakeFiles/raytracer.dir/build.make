@@ -109,6 +109,10 @@ raytracer_EXTERNAL_OBJECTS =
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/src/cpu/main.cpp.o
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/src/gpu/render.cu.o
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/build.make
+CMakeFiles/raytracer.dir/cmake_device_link.o: /usr/lib/x86_64-linux-gnu/libcudart_static.a
+CMakeFiles/raytracer.dir/cmake_device_link.o: /usr/lib/x86_64-linux-gnu/librt.a
+CMakeFiles/raytracer.dir/cmake_device_link.o: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
+CMakeFiles/raytracer.dir/cmake_device_link.o: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/deviceLinkLibs.rsp
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/deviceObjects1.rsp
 CMakeFiles/raytracer.dir/cmake_device_link.o: CMakeFiles/raytracer.dir/dlink.txt
@@ -130,6 +134,10 @@ raytracer_EXTERNAL_OBJECTS =
 raytracer: CMakeFiles/raytracer.dir/src/cpu/main.cpp.o
 raytracer: CMakeFiles/raytracer.dir/src/gpu/render.cu.o
 raytracer: CMakeFiles/raytracer.dir/build.make
+raytracer: /usr/lib/x86_64-linux-gnu/libcudart_static.a
+raytracer: /usr/lib/x86_64-linux-gnu/librt.a
+raytracer: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
+raytracer: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
 raytracer: CMakeFiles/raytracer.dir/cmake_device_link.o
 raytracer: CMakeFiles/raytracer.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/christianw/raytracer-cuda/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable raytracer"

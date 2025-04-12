@@ -150,6 +150,47 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
  /usr/include/c++/13/bits/istream.tcc \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/mpi.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/mpi_portable_platform.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/mpicxx.h \
+ /usr/include/c++/13/map /usr/include/c++/13/bits/stl_tree.h \
+ /usr/include/c++/13/ext/aligned_buffer.h \
+ /usr/include/c++/13/bits/node_handle.h \
+ /usr/include/c++/13/bits/stl_map.h \
+ /usr/include/c++/13/bits/stl_multimap.h \
+ /usr/include/c++/13/bits/erase_if.h /usr/include/c++/13/utility \
+ /usr/include/c++/13/bits/stl_relops.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/constants.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/functions.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/datatype.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/exception.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/op.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/status.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/request.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/group.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/comm.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/win.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/file.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/errhandler.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intracomm.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/topology.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intercomm.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/info.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/datatype_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/functions_inln.h \
+ /usr/include/string.h /usr/include/strings.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/request_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/comm_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intracomm_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/topology_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/intercomm_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/group_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/op_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/errhandler_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/status_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/info_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/win_inln.h \
+ /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi/ompi/mpi/cxx/file_inln.h \
  /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
  /home/christianw/raytracer-cuda/include/raytracer/rtweekend.h \
@@ -205,16 +246,14 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: \
  /usr/include/library_types.h /usr/include/channel_descriptor.h \
  /usr/include/cuda_runtime_api.h /usr/include/cuda_device_runtime_api.h \
  /usr/include/driver_functions.h /usr/include/vector_functions.h \
- /usr/include/vector_functions.hpp /usr/include/c++/13/utility \
- /usr/include/c++/13/bits/stl_relops.h /usr/include/curand_discrete.h \
+ /usr/include/vector_functions.hpp /usr/include/curand_discrete.h \
  /usr/include/curand_precalc.h /usr/include/curand_mrg32k3a.h \
  /usr/include/curand_mtgp32_kernel.h /usr/include/c++/13/stdlib.h \
- /usr/include/memory.h /usr/include/string.h /usr/include/strings.h \
- /usr/include/curand_mtgp32.h /usr/include/curand_philox4x32_x.h \
- /usr/include/curand_globals.h /usr/include/curand_uniform.h \
- /usr/include/curand_normal.h /usr/include/curand_normal_static.h \
- /usr/include/curand_lognormal.h /usr/include/curand_poisson.h \
- /usr/include/curand_discrete2.h \
+ /usr/include/memory.h /usr/include/curand_mtgp32.h \
+ /usr/include/curand_philox4x32_x.h /usr/include/curand_globals.h \
+ /usr/include/curand_uniform.h /usr/include/curand_normal.h \
+ /usr/include/curand_normal_static.h /usr/include/curand_lognormal.h \
+ /usr/include/curand_poisson.h /usr/include/curand_discrete2.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_dispatch_impl.h \
  /home/christianw/raytracer-cuda/include/raytracer/bvh.h \
@@ -232,10 +271,21 @@ CMakeFiles/raytracer.dir/src/cpu/main.cpp.o: \
  /home/christianw/raytracer-cuda/include/raytracer/camera_data.h \
  /home/christianw/raytracer-cuda/include/raytracer/render.h \
  /home/christianw/raytracer-cuda/include/raytracer/cuda_utils.h \
+ /home/christianw/raytracer-cuda/include/raytracer/PPM.h \
  /usr/include/c++/13/vector /usr/include/c++/13/bits/stl_uninitialized.h \
  /usr/include/c++/13/bits/stl_vector.h \
  /usr/include/c++/13/bits/stl_bvector.h \
- /usr/include/c++/13/bits/vector.tcc \
+ /usr/include/c++/13/bits/vector.tcc /usr/include/c++/13/fstream \
+ /usr/include/c++/13/bits/codecvt.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
+ /usr/include/c++/13/bits/fstream.tcc /usr/include/c++/13/chrono \
+ /usr/include/c++/13/bits/chrono.h /usr/include/c++/13/ratio \
+ /usr/include/c++/13/cstdint \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+ /usr/include/c++/13/ctime /usr/include/c++/13/bits/parse_numbers.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable.h \
  /home/christianw/raytracer-cuda/include/raytracer/hittable_list.h \
  /home/christianw/raytracer-cuda/include/raytracer/material.h \

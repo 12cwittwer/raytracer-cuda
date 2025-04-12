@@ -11,7 +11,7 @@ CUDA_FLAGS = -G -O0 -g -lineinfo -std=c++17 "--generate-code=arch=compute_53,cod
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/christianw/raytracer-cuda/include
+CXX_INCLUDES = -I/home/christianw/raytracer-cuda/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi
 
 CXX_FLAGS = -O0 -g -std=gnu++17
 
