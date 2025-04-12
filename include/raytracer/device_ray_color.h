@@ -17,6 +17,7 @@ __device__ color ray_color(
         return color(0, 0, 0);
         
     hit_record rec;
+    rec.hit = false;
     interval t_range(0.001, 1.0e30);
 
     hit_hittable(*world, r, t_range, rec);

@@ -47,6 +47,7 @@ struct quad {
 __host__ __device__ inline void hit_quad(
     const quad& quad, const ray& r, interval ray_t, hit_record rec
 ) {
+    rec.hit = false;
     auto denom = dot(quad.normal, r.direction());
     if (fabs(denom) < 1e-8)
         return;

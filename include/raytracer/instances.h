@@ -25,6 +25,7 @@ struct gpu_hittable_list {
 
 __host__ __device__
 inline void hit_gpu_hittable_list(const gpu_hittable_list& list, const ray& r, interval ray_t, hit_record& rec) {
+    rec.hit = false;
     hit_record temp_rec;
 
     for (int i = 0; i < list.count; i++) {
@@ -108,6 +109,7 @@ struct rotate_y {
 
 __host__ __device__
 inline void hit_translate(const translate& t, const ray& r, interval ray_t, hit_record& rec) {
+    rec.hit = false;
     ray offset_r(r.origin() - t.offset, r.direction());
     hit_hittable(*t.object, offset_r, ray_t, rec);
 
@@ -118,6 +120,7 @@ inline void hit_translate(const translate& t, const ray& r, interval ray_t, hit_
 
 __host__ __device__
 inline void hit_rotate(const rotate_y& rot, const ray& r, interval ray_t, hit_record& rec) {
+    rec.hit = false;
     auto origin = point3(
         rot.cos_theta * r.origin().x() - rot.sin_theta * r.origin().z(),
         r.origin().y(),
