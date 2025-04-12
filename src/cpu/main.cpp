@@ -1721,12 +1721,12 @@ void final_sphere() {
     materials[material_count++] = material{material_type::lambertian, nullptr};
     materials[material_count++] = material{material_type::lambertian, nullptr};
 
-    spheres[sphere_count++] = gpu_sphere(point3(-1.0, 0, -10), 0.5, nullptr); // glass 1
-    spheres[sphere_count++] = gpu_sphere(point3(-0.3, 0, -10), 0.5, nullptr); // glass 2
-    spheres[sphere_count++] = gpu_sphere(point3(0.5, 0, -10), 0.5, nullptr);  // metal 1
-    spheres[sphere_count++] = gpu_sphere(point3(1.3, 0, -10), 0.5, nullptr);  // metal 2
-    spheres[sphere_count++] = gpu_sphere(point3(0, 1.0, -10), 0.5, nullptr);  // lambertian 1
-    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -10), 900, nullptr);  // lambertian 2 (floor)
+    spheres[sphere_count++] = gpu_sphere(point3(-1.0, 0, -9), 0.5, nullptr); // glass 1
+    spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -8), 0.8, nullptr); // glass 2
+    spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -10), 0.5, nullptr);  // metal 1
+    spheres[sphere_count++] = gpu_sphere(point3(1.0, 0, -9), 0.5, nullptr);  // metal 2
+    spheres[sphere_count++] = gpu_sphere(point3(0, 1.0, -9), 0.5, nullptr);  // lambertian 1
+    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -15), 900, nullptr);  // lambertian 2 (floor)
 
     for (int i = 0; i < max_objects; i++) {
         objects[object_count++] = hittable{hittable_type::sphere, nullptr};
@@ -1800,9 +1800,9 @@ void final_sphere() {
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
-    cam.samples_per_pixel = 10;
+    cam.samples_per_pixel = 200;
     cam.max_depth = 5;
-    cam.background = color(0.2, 0.2, 0.2);
+    cam.background = color(1.0, 1.0, 1.0);
     cam.vfov = 20;
     cam.lookfrom = point3(0, 0, 0);
     cam.lookat = point3(0, 0, -1);
