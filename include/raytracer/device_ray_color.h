@@ -19,7 +19,7 @@ __device__ color ray_color(
     hit_record rec;
     interval t_range(0.001, 1.0e30);
 
-    rec = hit_hittable(*world, r, t_range, rec);
+    hit_hittable(*world, r, t_range, rec);
 
     if (!rec.hit)
         return background;

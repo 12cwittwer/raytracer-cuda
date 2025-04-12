@@ -24,21 +24,18 @@ struct gpu_hittable_list {
 };
 
 __host__ __device__
-inline hit_record hit_gpu_hittable_list(const gpu_hittable_list& list, const ray& r, interval ray_t, hit_record& rec) {
+inline void hit_gpu_hittable_list(const gpu_hittable_list& list, const ray& r, interval ray_t, hit_record& rec) {
     hit_record temp_rec;
-    bool hit_anything = false;
-    auto closest_so_far = ray_t.max;
 
     for (int i = 0; i < list.count; i++) {
-        temp_rec = hit_hittable(list.objects[i], r, interval(ray_t.min, closest_so_far), rec);
-        if (temp_rec.hit) {
-            hit_anything = true;
-            closest_so_far = temp_rec.t;
+        hit_hittable(list.objects[i], r, ray_t, temp_rec);
+
+        if (temp_rec.hit && temp_rec.t < ray_t.max) {
+            ray_t.max = temp_rec.t;
             rec = temp_rec;
+            temp_rec.hit = false;
         }
     }
-
-    return rec;
 }
 
 struct translate {
@@ -110,19 +107,17 @@ struct rotate_y {
 };
 
 __host__ __device__
-inline hit_record hit_translate(const translate& t, const ray& r, interval ray_t, hit_record& rec) {
+inline void hit_translate(const translate& t, const ray& r, interval ray_t, hit_record& rec) {
     ray offset_r(r.origin() - t.offset, r.direction());
-    hit_record temp_rec = hit_hittable(*t.object, offset_r, ray_t, rec);
+    hit_hittable(*t.object, offset_r, ray_t, rec);
 
-    if (!temp_rec.hit)
-        return rec;
-
-    temp_rec.p += t.offset;
-    return temp_rec;
+    if (rec.hit) {
+        rec.p += t.offset;
+    }
 }
 
 __host__ __device__
-inline hit_record hit_rotate(const rotate_y& rot, const ray& r, interval ray_t, hit_record& rec) {
+inline void hit_rotate(const rotate_y& rot, const ray& r, interval ray_t, hit_record& rec) {
     auto origin = point3(
         rot.cos_theta * r.origin().x() - rot.sin_theta * r.origin().z(),
         r.origin().y(),
@@ -136,10 +131,11 @@ inline hit_record hit_rotate(const rotate_y& rot, const ray& r, interval ray_t, 
     );
 
     ray rotated_r(origin, direction);
-    hit_record temp_rec = hit_hittable(*rot.object, rotated_r, ray_t, rec);
+    hit_record temp_rec = rec;
+    hit_hittable(*rot.object, rotated_r, ray_t, temp_rec);
 
     if (!temp_rec.hit)
-        return rec;
+        return;
 
     temp_rec.p = point3(
         rot.cos_theta * temp_rec.p.x() + rot.sin_theta * temp_rec.p.z(),
@@ -153,7 +149,7 @@ inline hit_record hit_rotate(const rotate_y& rot, const ray& r, interval ray_t, 
         -rot.sin_theta * temp_rec.normal.x() + rot.cos_theta * temp_rec.normal.z()
     );
 
-    return temp_rec;
+    rec = temp_rec;
 }
 
 #include "hittable_dispatch_impl.h"

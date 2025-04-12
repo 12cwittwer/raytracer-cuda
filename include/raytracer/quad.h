@@ -44,16 +44,16 @@ struct quad {
     }
 };
 
-__host__ __device__ inline hit_record hit_quad(
+__host__ __device__ inline void hit_quad(
     const quad& quad, const ray& r, interval ray_t, hit_record rec
 ) {
     auto denom = dot(quad.normal, r.direction());
     if (fabs(denom) < 1e-8)
-        return rec;
+        return;
 
     auto t = (quad.D - dot(quad.normal, r.origin())) / denom;
     if (!ray_t.contains(t))
-        return rec;
+        return;
 
     point3 p = r.at(t);
     vec3 planar_vec = p - quad.Q;
@@ -61,7 +61,7 @@ __host__ __device__ inline hit_record hit_quad(
     auto beta  = dot(cross(quad.u, planar_vec), quad.normal) / dot(cross(quad.u, quad.v), quad.normal);
 
     if (alpha < 0 || alpha > 1 || beta < 0 || beta > 1)
-        return rec;
+        return;
 
     rec.t = t;
     rec.p = p;
@@ -70,8 +70,6 @@ __host__ __device__ inline hit_record hit_quad(
     rec.v = beta;
     rec.set_face_normal(r, quad.normal);
     rec.hit = true;
-
-    return rec;
 }
 
 

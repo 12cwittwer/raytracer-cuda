@@ -11,20 +11,17 @@ struct hittable_list {
     int count;
 
     __host__ __device__
-    hit_record hit(const ray& r, interval ray_t) const {
+    void hit(const ray& r, interval ray_t) const {
         hit_record final_rec;
         final_rec.hit = false;
         auto closest_so_far = ray_t.max;
 
         for (int i = 0; i < count; ++i) {
-            hit_record rec = hit_hittable(objects[i], r, interval(ray_t.min, closest_so_far), final_rec);
-            if (rec.hit) {
-                closest_so_far = rec.t;
-                final_rec = rec;
+            hit_hittable(objects[i], r, interval(ray_t.min, closest_so_far), final_rec);
+            if (final_rec.hit) {
+                closest_so_far = final_rec.t;
             }
         }
-
-        return final_rec;
     }
 
     __host__ __device__

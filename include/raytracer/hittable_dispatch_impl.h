@@ -8,26 +8,32 @@
 #include "instances.h"
 
 __host__ __device__ inline
-hit_record hit_hittable(const hittable& h, const ray& r, interval ray_t, hit_record& rec) {
+void hit_hittable(const hittable& h, const ray& r, interval ray_t, hit_record& rec) {
     if (h.data == nullptr) {
         rec.hit = false;
-        return rec;
+        return;
     }
     switch (h.type) {
         case hittable_type::sphere:
-            return hit_sphere(*reinterpret_cast<const gpu_sphere*>(h.data), r, ray_t, rec);
+            hit_sphere(*reinterpret_cast<const gpu_sphere*>(h.data), r, ray_t, rec);
+            return;
         case hittable_type::bvh_node:
-            return reinterpret_cast<const bvh_node*>(h.data)->hit(r, ray_t);
+            reinterpret_cast<const bvh_node*>(h.data)->hit(r, ray_t, rec);
+            return;
         case hittable_type::quad:
-            return hit_quad(*reinterpret_cast<const quad*>(h.data), r, ray_t, rec);
+            hit_quad(*reinterpret_cast<const quad*>(h.data), r, ray_t, rec);
+            return;
         case hittable_type::translate:
-            return hit_translate(*reinterpret_cast<const translate*>(h.data), r, ray_t, rec);
+            hit_translate(*reinterpret_cast<const translate*>(h.data), r, ray_t, rec);
+            return;
         case hittable_type::rotate_y:
-            return hit_rotate(*reinterpret_cast<const rotate_y*>(h.data), r, ray_t, rec);
+            hit_rotate(*reinterpret_cast<const rotate_y*>(h.data), r, ray_t, rec);
+            return;
         case hittable_type::hittable_list:
-            return hit_gpu_hittable_list(*reinterpret_cast<const gpu_hittable_list*>(h.data), r, ray_t, rec);        
+            hit_gpu_hittable_list(*reinterpret_cast<const gpu_hittable_list*>(h.data), r, ray_t, rec);
+            return;   
         default:
-            return hit_record{};
+            return;
     }
 }
 
