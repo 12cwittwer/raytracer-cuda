@@ -1708,11 +1708,11 @@ void final_sphere() {
     glasses[glass_count++] = dielectric{1.5};
     glasses[glass_count++] = dielectric{1.3};
 
-    metals[metal_count++] = metal{color(0.8, 0.3, 0.3), 0.33};
+    metals[metal_count++] = metal{color(0.8, 0.3, 0.3), 0.05};
     metals[metal_count++] = metal{color(0.3, 0.8, 0.3), 0.05};
 
     lambertians[lambertian_count++] = lambertian{color(0.1, 0.1, 0.8)};
-    lambertians[lambertian_count++] = lambertian{color(0.0, 0.8, 0.0)};
+    lambertians[lambertian_count++] = lambertian{color(0.0, 0.6, 0.0)};
 
     materials[material_count++] = material{material_type::dielectric, nullptr};
     materials[material_count++] = material{material_type::dielectric, nullptr};
@@ -1726,7 +1726,7 @@ void final_sphere() {
     spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -10), 0.5, nullptr);  // metal 1
     spheres[sphere_count++] = gpu_sphere(point3(1.0, 0, -9), 0.5, nullptr);  // metal 2
     spheres[sphere_count++] = gpu_sphere(point3(0, 1.0, -9), 0.5, nullptr);  // lambertian 1
-    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -15), 898, nullptr);  // lambertian 2 (floor)
+    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -15), 899.5, nullptr);  // lambertian 2 (floor)
 
     for (int i = 0; i < max_objects; i++) {
         objects[object_count++] = hittable{hittable_type::sphere, nullptr};
