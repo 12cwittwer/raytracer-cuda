@@ -47,7 +47,7 @@ __global__ void render_kernel(
 #include "raytracer/cuda_utils.h"  // for CUDA_CHECK
 
 void launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height, int row) {
-    const dim3 threads_per_block(8, 1);
+    const dim3 threads_per_block(256, 1);
     const dim3 num_blocks((image_width + threads_per_block.x - 1) / threads_per_block.x, 1);
 
     // Launch kernel
