@@ -184,6 +184,7 @@ void mpi() {
 
 
 int main(int argc, char** argv) {
+    MPI_Init(&argc, &argv);
     switch (1) {
         case 1: mpi();      break;
     }
