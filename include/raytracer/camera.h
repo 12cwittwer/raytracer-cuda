@@ -129,6 +129,9 @@ class camera {
 
     void render_whole(const hittable* d_world) {
         initialize();
+        auto start = std::chrono::high_resolution_clock::now();
+
+        PPM image = PPM(image_height, image_width);
     
         const int image_size = image_width * image_height;
     
@@ -152,10 +155,19 @@ class camera {
     
         // --- Output image (optional) ---
         write_ppm(std::cout, h_fb.data(), image_height, image_width);
+
+        for (int i = 0; i < image_size; i++) {
+            image.setPixel(image_size / image_height, image_size % image_height, h_fb[i]);
+        }
     
         // --- Cleanup ---
         CUDA_CHECK(cudaFree(d_fb));
         CUDA_CHECK(cudaFree(d_cam));
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Execution Time: " << duration.count() / 1000.0 << " s\n";
+        image.writeImage();
     }
     
     

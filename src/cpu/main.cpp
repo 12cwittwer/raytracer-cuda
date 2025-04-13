@@ -424,7 +424,7 @@ void whole_image() {;
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
-    switch (2) {
+    switch (3) {
         case 1: mpi();      break;
         case 2: cpu();      break;
         case 3: whole_image();  break;
