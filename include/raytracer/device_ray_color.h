@@ -21,7 +21,7 @@ __device__ color ray_color(
 
         hit_hittable(*world, r, interval(0.001, 1.0e30), rec);
 
-        if (!rec.hit) {
+        if (!rec.hit || rec.mat_ptr == nullptr) {
             result += attenuation * background;
             break;
         }
@@ -39,7 +39,7 @@ __device__ color ray_color(
             break;
         }
 
-        attenuation *= temp_attenuation;
+        attenuation = attenuation * temp_attenuation;
         r = scattered;
     }
 
