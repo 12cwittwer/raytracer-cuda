@@ -154,7 +154,7 @@ void mpi() {
     CUDA_CHECK(cudaMalloc(&d_world, sizeof(hittable)));
     CUDA_CHECK(cudaMemcpy(d_world, &world, sizeof(hittable), cudaMemcpyHostToDevice));
 
-    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 500000));
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 32768));
 
     cam.render_gpu(d_world, rank, num_procs);
 

@@ -6,31 +6,43 @@
 #include "cuda_compat.h"
 
 __device__ color ray_color(
-    const ray& r,
+    ray r,
     int depth,
     const hittable* world,
     color background,
-    curandState rng
+    curandState& rng
 ) {
+    color result(0, 0, 0);
+    color attenuation(1, 1, 1);
 
-    if (depth <= 0)
-        return color(0, 0, 0);
-        
-    hit_record rec;
-    rec.hit = false;
-    interval t_range(0.001, 1.0e30);
+    for (int i = 0; i < depth; i++) {
+        hit_record rec;
+        rec.hit = false;
+        interval t_range(0.001, 1.0e30);
 
-    hit_hittable(*world, r, t_range, rec);
+        hit_hittable(*world, r, t_range, rec);
 
-    if (!rec.hit)
-        return background;
+        if (!rec.hit) {
+            // Miss → background
+            result += attenuation * background;
+            break;
+        }
 
-    ray scattered;
-    color attenuation;
-    color emitted = emitted_material(*rec.mat_ptr, rec.u, rec.v, rec.p);
+        color emitted = emitted_material(*rec.mat_ptr, rec.u, rec.v, rec.p);
 
-    if (!scatter_material(*rec.mat_ptr, r, rec, attenuation, scattered, &rng))
-        return emitted;
+        ray scattered;
+        color temp_attenuation;
 
-    return emitted + attenuation * ray_color(scattered, depth - 1, world, background, rng);
+        if (!scatter_material(*rec.mat_ptr, r, rec, temp_attenuation, scattered, &rng)) {
+            // Absorbed → only emitted light
+            result += attenuation * emitted;
+            break;
+        }
+
+        result += attenuation * emitted;
+        attenuation = attenuation * temp_attenuation;
+        r = scattered;
+    }
+
+    return result;
 }
