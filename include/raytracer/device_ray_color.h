@@ -16,14 +16,12 @@ __device__ color ray_color(
     color attenuation(1, 1, 1);
 
     for (int i = 0; i < depth; i++) {
-        hit_record rec;
+        hit_record rec = {};
         rec.hit = false;
-        interval t_range(0.001, 1.0e30);
 
-        hit_hittable(*world, r, t_range, rec);
+        hit_hittable(*world, r, interval(0.001, 1.0e30), rec);
 
         if (!rec.hit) {
-            // Miss → background
             result += attenuation * background;
             break;
         }
@@ -33,14 +31,15 @@ __device__ color ray_color(
         ray scattered;
         color temp_attenuation;
 
-        if (!scatter_material(*rec.mat_ptr, r, rec, temp_attenuation, scattered, &rng)) {
-            // Absorbed → only emitted light
-            result += attenuation * emitted;
+        bool scattered_success = scatter_material(*rec.mat_ptr, r, rec, temp_attenuation, scattered, &rng);
+
+        result += attenuation * emitted;
+
+        if (!scattered_success) {
             break;
         }
 
-        result += attenuation * emitted;
-        attenuation = attenuation * temp_attenuation;
+        attenuation *= temp_attenuation;
         r = scattered;
     }
 
