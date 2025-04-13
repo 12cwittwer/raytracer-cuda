@@ -34,7 +34,7 @@ __global__ void render_kernel(
 
     int pixel_index = x;
     curandState rng;
-    curand_init(1984 + pixel_index, 0, 0, &rng);
+    curand_init(1984 + row * cam->image_width + x, 0, 0, &rng);
 
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
