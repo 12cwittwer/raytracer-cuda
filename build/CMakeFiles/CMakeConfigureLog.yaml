@@ -940,3 +940,76 @@ events:
         
       exitCode: 0
 ...
+
+---
+events:
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1278 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1322 (_MPI_try_staged_settings)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1645 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:5 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode normal"
+    directories:
+      source: "/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP"
+      binary: "/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP"
+    cmakeVariables:
+      CMAKE_CUDA_ARCHITECTURES: "52"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bf16b/fast
+        gmake[1]: Entering directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_bf16b.dir/build.make CMakeFiles/cmTC_bf16b.dir/build
+        gmake[2]: Entering directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP'
+        Building CXX object CMakeFiles/cmTC_bf16b.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_bf16b.dir/test_mpi.cpp.o -c /home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP/test_mpi.cpp
+        Linking CXX executable cmTC_bf16b
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bf16b.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_bf16b.dir/test_mpi.cpp.o -o cmTC_bf16b  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so 
+        gmake[2]: Leaving directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP'
+        gmake[1]: Leaving directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-m01XwP'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1278 (try_compile)"
+      - "/usr/share/cmake-3.28/Modules/FindMPI.cmake:1672 (_MPI_try_staged_settings)"
+      - "CMakeLists.txt:5 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode MPICXX"
+    directories:
+      source: "/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G"
+      binary: "/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G"
+    cmakeVariables:
+      CMAKE_CUDA_ARCHITECTURES: "52"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_MPICXX"
+      cached: true
+      stdout: |
+        Change Dir: '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G'
+        
+        Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a4f93/fast
+        gmake[1]: Entering directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G'
+        /usr/bin/gmake  -f CMakeFiles/cmTC_a4f93.dir/build.make CMakeFiles/cmTC_a4f93.dir/build
+        gmake[2]: Entering directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G'
+        Building CXX object CMakeFiles/cmTC_a4f93.dir/test_mpi.cpp.o
+        /usr/bin/c++  -isystem /usr/lib/x86_64-linux-gnu/openmpi/include -isystem /usr/lib/x86_64-linux-gnu/openmpi/include/openmpi  -o CMakeFiles/cmTC_a4f93.dir/test_mpi.cpp.o -c /home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G/test_mpi.cpp
+        Linking CXX executable cmTC_a4f93
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a4f93.dir/link.txt --verbose=1
+        /usr/bin/c++ CMakeFiles/cmTC_a4f93.dir/test_mpi.cpp.o -o cmTC_a4f93  -Wl,-rpath,/usr/lib/x86_64-linux-gnu/openmpi/lib /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so 
+        gmake[2]: Leaving directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G'
+        gmake[1]: Leaving directory '/home/christianw/raytracer-cuda/build/CMakeFiles/CMakeScratch/TryCompile-Vzjh8G'
+        
+      exitCode: 0
+...

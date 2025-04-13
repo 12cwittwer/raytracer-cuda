@@ -59,9 +59,16 @@ class camera {
             std::vector<color> h_fb(image_width);
             CUDA_CHECK(cudaMemcpy(h_fb.data(), d_fb, image_width * sizeof(color), cudaMemcpyDeviceToHost));
     
-            // Send both row and color data together
-            MPI_Send(&row, 1, MPI_INT, 0, TAG_RESULT, MPI_COMM_WORLD);
-            MPI_Send(h_fb.data(), image_width * 3, MPI_FLOAT, 0, TAG_RESULT, MPI_COMM_WORLD);
+            std::vector<float> buffer(1 + image_width * 3); // 1 for row index
+            buffer[0] = static_cast<float>(row);
+            for (int i = 0; i < image_width; i++) {
+                buffer[1 + i * 3 + 0] = h_fb[i].x();
+                buffer[1 + i * 3 + 1] = h_fb[i].y();
+                buffer[1 + i * 3 + 2] = h_fb[i].z();
+            }
+            
+            MPI_Send(buffer.data(), 1 + image_width * 3, MPI_FLOAT, 0, TAG_RESULT, MPI_COMM_WORLD);
+            
         }
     
         CUDA_CHECK(cudaFree(d_fb));
@@ -88,18 +95,19 @@ class camera {
         }
     
         while (active_workers > 0) {
-            int row_index;
-            MPI_Recv(&row_index, 1, MPI_INT, MPI_ANY_SOURCE, TAG_RESULT, MPI_COMM_WORLD, &status);
-    
-            std::vector<float> buffer(image_width * 3);
+            std::vector<float> buffer(1 + image_width * 3);
+            MPI_Recv(buffer.data(), 1 + image_width * 3, MPI_FLOAT, MPI_ANY_SOURCE, TAG_RESULT, MPI_COMM_WORLD, &status);
+            
+            int row_index = static_cast<int>(buffer[0]);
             int worker_rank = status.MPI_SOURCE;
-    
-            MPI_Recv(buffer.data(), image_width * 3, MPI_FLOAT, worker_rank, TAG_RESULT, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    
-            for (int i = 0; i < image_width; i++) { 
-                color pixel_color(buffer[i * 3], buffer[i * 3 + 1], buffer[i * 3 + 2]);
+            
+            for (int i = 0; i < image_width; i++) {
+                color pixel_color(buffer[1 + i * 3 + 0],
+                                  buffer[1 + i * 3 + 1],
+                                  buffer[1 + i * 3 + 2]);
                 image.setPixel(row_index, i, pixel_color);
             }
+                   
     
             if (next_row < image_height) {
                 MPI_Send(&next_row, 1, MPI_INT, worker_rank, TAG_WORK, MPI_COMM_WORLD);
