@@ -12,6 +12,10 @@
 
 #include "raytracer/cuda_utils.h"  // for CUDA_CHECK
 
+int WIDTH = 800;
+int SAMPLES = 100;
+int DEPTH = 10;
+
 void mpi() {
     int rank, num_procs;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -20,9 +24,9 @@ void mpi() {
     // === Camera Setup ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 800;
-    cam.samples_per_pixel = 100;
-    cam.max_depth = 10;
+    cam.image_width = WIDTH;
+    cam.samples_per_pixel = SAMPLES;
+    cam.max_depth = DEPTH;
     cam.background = color(1.0, 1.0, 1.0);
     cam.vfov = 20;
     cam.lookfrom = point3(0, 0, 0);
@@ -184,9 +188,9 @@ void cpu() {
     // === Camera Setup ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 800;
-    cam.samples_per_pixel = 100;
-    cam.max_depth = 10;
+    cam.image_width = WIDTH;
+    cam.samples_per_pixel = SAMPLES;
+    cam.max_depth = DEPTH;
     cam.background = color(1.0, 1.0, 1.0);
     cam.vfov = 20;
     cam.lookfrom = point3(0, 0, 0);
@@ -269,9 +273,9 @@ void whole_image() {;
     // === Camera Setup ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 800;
-    cam.samples_per_pixel = 100;
-    cam.max_depth = 10;
+    cam.image_width = WIDTH;
+    cam.samples_per_pixel = SAMPLES;
+    cam.max_depth = DEPTH;
     cam.background = color(1.0, 1.0, 1.0);
     cam.vfov = 20;
     cam.lookfrom = point3(0, 0, 0);
