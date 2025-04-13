@@ -34,20 +34,22 @@ __global__ void render_kernel(
 
     int pixel_index = x;
     curandState rng;
-    curand_init(1984 + row * cam->image_width + x, 0, 0, &rng);
+    int seed = 1984 + row * cam->image_width + x;
+    curand_init(seed, 0, 0, &rng);
 
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
         ray r = get_ray(cam, x, y, &rng);
         pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
     }
-    framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
+    pixel_color /= cam->samples_per_pixel;
+    framebuffer[pixel_index] = pixel_color;
 }
 
 #include "raytracer/cuda_utils.h"  // for CUDA_CHECK
 
 void launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height, int row) {
-    const dim3 threads_per_block(256, 1);
+    const dim3 threads_per_block(512, 1);
     const dim3 num_blocks((image_width + threads_per_block.x - 1) / threads_per_block.x, 1);
 
     // Launch kernel
@@ -59,5 +61,5 @@ void launch_render_kernel(const camera_data* cam, const hittable* world, color* 
     CUDA_CHECK(cudaGetLastError());
 
     // Ensure kernel is finished before moving on
-    CUDA_CHECK(cudaDeviceSynchronize());
+    // CUDA_CHECK(cudaDeviceSynchronize());
 }

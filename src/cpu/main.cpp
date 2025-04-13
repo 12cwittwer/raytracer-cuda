@@ -180,13 +180,99 @@ void mpi() {
     MPI_Finalize();
 }
 
+void cpu() {
+    // === Camera Setup ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = 800;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 10;
+    cam.background = color(1.0, 1.0, 1.0);
+    cam.vfov = 20;
+    cam.lookfrom = point3(0, 0, 0);
+    cam.lookat = point3(0, 0, -1);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    // === World Structure ===
+
+    const int max_glass = 2;
+    const int max_metals = 2;
+    const int max_lambertians = 2;
+    const int max_spheres = 6;
+    const int max_materials = 6;
+    const int max_objects = 6;
+    const int max_hittable_list = 1;
+
+    dielectric* glasses = new dielectric[max_glass];
+    metal* metals = new metal[max_metals];
+    lambertian* lambertians = new lambertian[max_lambertians];
+    material* materials = new material[max_materials];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+    gpu_hittable_list* hittable_lists = new gpu_hittable_list[max_hittable_list];
+
+    int glass_count = 0;
+    int metal_count = 0;
+    int lambertian_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int object_count = 0;
+    int hittable_list_count = 0;
+
+    // === Build Scene ===
+    glasses[glass_count++] = dielectric{1.5};
+    glasses[glass_count++] = dielectric{1.3};
+
+    metals[metal_count++] = metal{color(0.8, 0.3, 0.3), 0.05};
+    metals[metal_count++] = metal{color(0.7, 0.1, 0.7), 0.05};
+
+    lambertians[lambertian_count++] = lambertian{color(0.1, 0.1, 0.8)};
+    lambertians[lambertian_count++] = lambertian{color(0.0, 0.6, 0.0)};
+
+    materials[material_count++] = material{material_type::dielectric, (void*)&glasses[0]};
+    materials[material_count++] = material{material_type::dielectric, (void*)&glasses[1]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[0]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[1]};
+    materials[material_count++] = material{material_type::lambertian, (void*)&lambertians[0]};
+    materials[material_count++] = material{material_type::lambertian, (void*)&lambertians[1]};
+
+    spheres[sphere_count++] = gpu_sphere(point3(-1.0, 0, -9), 0.5, &materials[0]);
+    spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -8), 0.2, &materials[1]);
+    spheres[sphere_count++] = gpu_sphere(point3(0.0, 0, -10), 0.5, &materials[2]);
+    spheres[sphere_count++] = gpu_sphere(point3(1.0, 0, -9), 0.5, &materials[3]);
+    spheres[sphere_count++] = gpu_sphere(point3(0, 1.0, -9), 0.5, &materials[4]);
+    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -15), 899.5, &materials[5]);
+
+    for (int i = 0; i < max_objects; i++) {
+        objects[object_count++] = hittable{hittable_type::sphere, (void*)&spheres[i]};
+    }
+
+    hittable_lists[hittable_list_count++] = gpu_hittable_list{objects, object_count};
+
+    hittable world = hittable{hittable_type::hittable_list, (void*)&hittable_lists[0]};
+
+    cam.render(&world);
+
+    // === Cleanup Host ===
+    delete[] glasses;
+    delete[] metals;
+    delete[] lambertians;
+    delete[] materials;
+    delete[] spheres;
+    delete[] objects;
+    delete[] hittable_lists;
+}
+
+
 
 
 
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
-    switch (1) {
+    switch (2) {
         case 1: mpi();      break;
+        case 2: cpu();      break;
     }
 
     return 0;
