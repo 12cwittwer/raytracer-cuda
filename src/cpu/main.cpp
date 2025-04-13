@@ -396,7 +396,7 @@ void whole_image() {;
     CUDA_CHECK(cudaMalloc(&d_world, sizeof(hittable)));
     CUDA_CHECK(cudaMemcpy(d_world, &world, sizeof(hittable), cudaMemcpyHostToDevice));
 
-    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 500000));
+    CUDA_CHECK(cudaDeviceSetLimit(cudaLimitStackSize, 32768));
 
     cam.render_whole(d_world);
 
@@ -423,9 +423,12 @@ void whole_image() {;
 
 
 int main(int argc, char** argv) {
-    MPI_Init(&argc, &argv);
     switch (3) {
-        case 1: mpi();      break;
+        case 1: {
+            MPI_Init(&argc, &argv);
+            mpi();
+            break;
+        } 
         case 2: cpu();      break;
         case 3: whole_image();  break;
     }

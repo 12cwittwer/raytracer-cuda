@@ -152,9 +152,6 @@ class camera {
         // --- Copy framebuffer back to host ---
         std::vector<color> h_fb(image_size);
         CUDA_CHECK(cudaMemcpy(h_fb.data(), d_fb, image_size * sizeof(color), cudaMemcpyDeviceToHost));
-    
-        // --- Output image (optional) ---
-        write_ppm(std::cout, h_fb.data(), image_height, image_width);
 
         for (int i = 0; i < image_size; i++) {
             image.setPixel(image_size / image_height, image_size % image_height, h_fb[i]);
