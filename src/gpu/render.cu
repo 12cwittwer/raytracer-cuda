@@ -63,3 +63,43 @@ void launch_render_kernel(const camera_data* cam, const hittable* world, color* 
     // Ensure kernel is finished before moving on
     // CUDA_CHECK(cudaDeviceSynchronize());
 }
+
+__global__ void image_render_kernel(
+    const camera_data* __restrict__ cam,
+    const hittable* __restrict__ world,
+    color* __restrict__ framebuffer
+) {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x >= cam->image_width || y >= cam->image_height) return;
+
+    int pixel_index = y * cam->image_width + x;
+
+    curandState rng;
+    int seed = 1984 + y * cam->image_width + x;  // unique per pixel
+    curand_init(seed, 0, 0, &rng);
+
+    color pixel_color(0, 0, 0);
+    for (int s = 0; s < cam->samples_per_pixel; ++s) {
+        ray r = get_ray(cam, x, y, &rng);
+        pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
+    }
+
+    pixel_color /= cam->samples_per_pixel;
+    framebuffer[pixel_index] = pixel_color;
+}
+
+void image_launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height) {
+    const dim3 threads_per_block(16, 16);
+    const dim3 num_blocks(
+        (image_width + threads_per_block.x - 1) / threads_per_block.x,
+        (image_height + threads_per_block.y - 1) / threads_per_block.y
+    );
+
+    image_render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
+
+    CUDA_CHECK(cudaGetLastError());
+}
+
+
