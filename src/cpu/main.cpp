@@ -20,9 +20,9 @@ void mpi() {
     // === Camera Setup ===
     camera cam;
     cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 1200;
-    cam.samples_per_pixel = 200;
-    cam.max_depth = 5;
+    cam.image_width = 800;
+    cam.samples_per_pixel = 100;
+    cam.max_depth = 10;
     cam.background = color(1.0, 1.0, 1.0);
     cam.vfov = 20;
     cam.lookfrom = point3(0, 0, 0);
@@ -67,7 +67,7 @@ void mpi() {
     glasses[glass_count++] = dielectric{1.3};
 
     metals[metal_count++] = metal{color(0.8, 0.3, 0.3), 0.05};
-    metals[metal_count++] = metal{color(0.3, 0.8, 0.3), 0.05};
+    metals[metal_count++] = metal{color(0.7, 0.1, 0.7), 0.05};
 
     lambertians[lambertian_count++] = lambertian{color(0.1, 0.1, 0.8)};
     lambertians[lambertian_count++] = lambertian{color(0.0, 0.6, 0.0)};

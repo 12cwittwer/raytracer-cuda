@@ -1,3 +1,2 @@
-rpi slots=1
 borin slots=2
-aorin slots=2
+aorin slots=1
