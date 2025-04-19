@@ -12,9 +12,9 @@
 
 #include "raytracer/cuda_utils.h"  // for CUDA_CHECK
 
-int WIDTH = 400;
-int SAMPLES = 20;
-int DEPTH = 2;
+int WIDTH = 600;
+int SAMPLES = 50;
+int DEPTH = 5;
 
 void mpi() {
     int rank, num_procs;
