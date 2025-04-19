@@ -12,9 +12,9 @@
 
 #include "raytracer/cuda_utils.h"  // for CUDA_CHECK
 
-int WIDTH = 1080;
+int WIDTH = 800;
 int SAMPLES = 50;
-int DEPTH = 2;
+int DEPTH = 5;
 
 void mpi() {
     int rank, num_procs;
@@ -424,10 +424,327 @@ void whole_image() {;
     delete[] hittable_lists;
 }
 
+void light() {
+    // === Camera Setup ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = WIDTH;
+    cam.samples_per_pixel = SAMPLES;
+    cam.max_depth = DEPTH;
+    cam.background = color(0.0, 0.0, 0.0);
+    cam.vfov = 20;
+    cam.lookfrom = point3(0, 0, 0);
+    cam.lookat = point3(0, 0, -1);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    // === World Structure ===
+    const int max_glass = 2;
+    const int max_metals = 2;
+    const int max_lambertians = 2;
+    const int max_light = 2;
+    const int max_quad = 2;
+    const int max_spheres = 6;
+    const int max_materials = 8;
+    const int max_objects = 8;
+    const int max_hittable_list = 1;
+
+    dielectric* glasses = new dielectric[max_glass];
+    metal* metals = new metal[max_metals];
+    lambertian* lambertians = new lambertian[max_lambertians];
+    diffuse_light* lights = new diffuse_light[max_light];
+    material* materials = new material[max_materials];
+    quad* quads = new quad[max_quad];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+    gpu_hittable_list* hittable_lists = new gpu_hittable_list[max_hittable_list];
+
+    int glass_count = 0;
+    int metal_count = 0;
+    int light_count = 0;
+    int lambertian_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int quad_count = 0;
+    int object_count = 0;
+    int hittable_list_count = 0;
+
+    // === Build Scene ===
+    glasses[glass_count++] = dielectric{1.5};
+    glasses[glass_count++] = dielectric{1.3};
+
+    metals[metal_count++] = metal{color(1, 1, 1), 0.00};
+    metals[metal_count++] = metal{color(0.7, 0.1, 0.7), 0.05};
+
+    lambertians[lambertian_count++] = lambertian{color(0.1, 0.1, 0.8)};
+    lambertians[lambertian_count++] = lambertian{color(0.0, 0.6, 0.0)};
+
+    lights[light_count++] = diffuse_light{color(1.0, 1.0, 1.0)};
+    lights[light_count++] = diffuse_light{color(0.8, 0.1, 0.3)};
+
+    materials[material_count++] = material{material_type::dielectric, (void*)&glasses[0]};
+    materials[material_count++] = material{material_type::dielectric, (void*)&glasses[1]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[0]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[1]};
+    materials[material_count++] = material{material_type::lambertian, (void*)&lambertians[0]};
+    materials[material_count++] = material{material_type::lambertian, (void*)&lambertians[1]};
+    materials[material_count++] = material{material_type::diffuse_light, (void*)&lights[0]};
+    materials[material_count++] = material{material_type::diffuse_light, (void*)&lights[1]};
+
+    // Spheres
+    spheres[sphere_count++] = gpu_sphere(point3(1.0, 0, -9), 0.5, &materials[0]);
+    spheres[sphere_count++] = gpu_sphere(point3(-100.0, 0, -8), 0.2, &materials[1]);
+    spheres[sphere_count++] = gpu_sphere(point3(-100.0, 0, -10), 0.5, &materials[2]);
+    spheres[sphere_count++] = gpu_sphere(point3(1, 0, -9), 0.5, &materials[3]);
+    spheres[sphere_count++] = gpu_sphere(point3(-100, 1.0, -9), 0.5, &materials[4]);
+    spheres[sphere_count++] = gpu_sphere(point3(0, -900, -15), 899.5, &materials[2]);
+
+    for (int i = 0; i < sphere_count && object_count < max_objects; i++) {
+        objects[object_count++] = hittable{hittable_type::sphere, (void*)&spheres[i]};
+    }
+
+    // Quads (light panels in view)
+    quads[quad_count++] = quad(point3(-1, 1.5, -11), vec3(2, 0, 0), vec3(0, -1, -1), &materials[6]);
+    quads[quad_count++] = quad(point3(-100.0, -1.0, -7.0), vec3(1.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0), &materials[7]);
+
+    for (int i = 0; i < quad_count && object_count < max_objects; i++) {
+        objects[object_count++] = hittable{hittable_type::quad, (void*)&quads[i]};
+    }
+
+    hittable_lists[hittable_list_count++] = gpu_hittable_list{objects, object_count};
+
+    hittable world = hittable{hittable_type::hittable_list, (void*)&hittable_lists[0]};
+
+    cam.render(&world);
+
+    // === Cleanup Host ===
+    delete[] glasses;
+    delete[] metals;
+    delete[] lambertians;
+    delete[] lights;
+    delete[] materials;
+    delete[] spheres;
+    delete[] objects;
+    delete[] hittable_lists;
+}
+
+void floating() {
+    // === Camera Setup ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = WIDTH;
+    cam.samples_per_pixel = SAMPLES;
+    cam.max_depth = DEPTH;
+    cam.background = color(0.0, 0.0, 0.0);
+    cam.vfov = 25;
+    cam.lookfrom = point3(0, 1, 3);
+    cam.lookat = point3(0, 0.5, -1);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    // === World Structure ===
+    const int max_glass = 1;
+    const int max_metals = 2;
+    const int max_lambertians = 1;
+    const int max_light = 3;
+    const int max_quad = 3;
+    const int max_spheres = 3;
+    const int max_materials = 7;
+    const int max_objects = 8;
+    const int max_hittable_list = 1;
+
+    dielectric* glasses = new dielectric[max_glass];
+    metal* metals = new metal[max_metals];
+    lambertian* lambertians = new lambertian[max_lambertians];
+    diffuse_light* lights = new diffuse_light[max_light];
+    material* materials = new material[max_materials];
+    quad* quads = new quad[max_quad];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+    gpu_hittable_list* hittable_lists = new gpu_hittable_list[max_hittable_list];
+
+    int glass_count = 0;
+    int metal_count = 0;
+    int light_count = 0;
+    int lambertian_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int quad_count = 0;
+    int object_count = 0;
+    int hittable_list_count = 0;
+
+    // === Materials ===
+    glasses[glass_count++] = dielectric{1.5};
+    metals[metal_count++] = metal{color(0.95, 0.95, 0.95), 0.01};  // Mirror
+    metals[metal_count++] = metal{color(0.5, 0.5, 0.5), 0.3};      // Rough metal
+    lambertians[lambertian_count++] = lambertian{color(0.2, 0.2, 0.8)}; // Decorative
+
+    lights[light_count++] = diffuse_light{color(6.0, 6.0, 6.0)}; // Bright white
+    lights[light_count++] = diffuse_light{color(0.8, 0.1, 0.1)}; // Warm
+    lights[light_count++] = diffuse_light{color(0.1, 0.1, 1.8)}; // Cool blue
+
+    materials[material_count++] = material{material_type::dielectric, (void*)&glasses[0]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[0]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[1]};
+    materials[material_count++] = material{material_type::lambertian, (void*)&lambertians[0]};
+    materials[material_count++] = material{material_type::diffuse_light, (void*)&lights[0]};
+    materials[material_count++] = material{material_type::diffuse_light, (void*)&lights[1]};
+    materials[material_count++] = material{material_type::diffuse_light, (void*)&lights[2]};
+
+    // === Geometry ===
+
+    // Floating crystal sphere
+    spheres[sphere_count++] = gpu_sphere(point3(0, 0, -5), 1, &materials[0]);
+
+    // Mirror floor
+    spheres[sphere_count++] = gpu_sphere(point3(0, -1000, -5), 999.0, &materials[1]);
+
+    // Accent orb
+    spheres[sphere_count++] = gpu_sphere(point3(1.2, 0.4, -4.5), 0.3, &materials[2]);
+
+    for (int i = 0; i < sphere_count && object_count < max_objects; i++) {
+        objects[object_count++] = hittable{hittable_type::sphere, (void*)&spheres[i]};
+    }
+
+    // Light panels (walls and ceiling)
+    quads[quad_count++] = quad(point3(-1.5, 1.5, -5.0), vec3(3, 0, 0), vec3(0, 0, -1), &materials[4]); // top
+    quads[quad_count++] = quad(point3(-2.0, 0, -6.0), vec3(0, 1, 0), vec3(0, 0, 3), &materials[5]);   // left warm
+    quads[quad_count++] = quad(point3(2.0, 0, -6.0), vec3(0, 1, 0), vec3(0, 0, 3), &materials[6]);    // right cool
+
+    for (int i = 0; i < quad_count && object_count < max_objects; i++) {
+        objects[object_count++] = hittable{hittable_type::quad, (void*)&quads[i]};
+    }
+
+    // === World and Render ===
+    hittable_lists[hittable_list_count++] = gpu_hittable_list{objects, object_count};
+    hittable world = hittable{hittable_type::hittable_list, (void*)&hittable_lists[0]};
+
+    cam.render(&world);
+
+    // === Cleanup ===
+    delete[] glasses;
+    delete[] metals;
+    delete[] lambertians;
+    delete[] lights;
+    delete[] materials;
+    delete[] quads;
+    delete[] spheres;
+    delete[] objects;
+    delete[] hittable_lists;
+}
+
+
+void corridor() {
+    // === Camera Setup ===
+    camera cam;
+    cam.aspect_ratio = 16.0 / 9.0;
+    cam.image_width = WIDTH;
+    cam.samples_per_pixel = SAMPLES;
+    cam.max_depth = DEPTH;
+    cam.background = color(0.0, 0.0, 0.0);
+    cam.vfov = 35;
+    cam.lookfrom = point3(0, 1, 3);
+    cam.lookat = point3(0, 1, -5);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0;
+
+    // === World Structure ===
+    const int max_glass = 2;
+    const int max_metals = 2;
+    const int max_light = 2;
+    const int max_lambertians = 1;
+    const int max_quad = 5;
+    const int max_spheres = 2;
+    const int max_materials = 8;
+    const int max_objects = 11;
+    const int max_hittable_list = 1;
+
+    dielectric* glasses = new dielectric[max_glass];
+    metal* metals = new metal[max_metals];
+    lambertian* lambertians = new lambertian[max_lambertians];
+    diffuse_light* lights = new diffuse_light[max_light];
+    material* materials = new material[max_materials];
+    quad* quads = new quad[max_quad];
+    gpu_sphere* spheres = new gpu_sphere[max_spheres];
+    hittable* objects = new hittable[max_objects];
+    gpu_hittable_list* hittable_lists = new gpu_hittable_list[max_hittable_list];
+
+    int glass_count = 0;
+    int metal_count = 0;
+    int light_count = 0;
+    int lambertian_count = 0;
+    int material_count = 0;
+    int sphere_count = 0;
+    int quad_count = 0;
+    int object_count = 0;
+    int hittable_list_count = 0;
+
+    // === Materials ===
+    glasses[glass_count++] = dielectric{1.5};  // Glass walls
+    metals[metal_count++] = metal{color(0.95, 0.95, 0.95), 0.01}; // Mirror
+    metals[metal_count++] = metal{color(0.2, 0.2, 0.2), 0.3};     // Matte dark
+
+    lambertians[lambertian_count++] = lambertian{color(0.2, 0.3, 0.8)}; // Orb core
+
+    lights[light_count++] = diffuse_light{color(0.6, 0.3, 1.0)};
+    lights[light_count++] = diffuse_light{color(1.0, 0.2, 1.0)};
+
+    materials[material_count++] = material{material_type::dielectric, (void*)&glasses[0]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[0]};
+    materials[material_count++] = material{material_type::metal, (void*)&metals[1]};
+    materials[material_count++] = material{material_type::lambertian, (void*)&lambertians[0]};
+    materials[material_count++] = material{material_type::diffuse_light, (void*)&lights[0]};
+    materials[material_count++] = material{material_type::diffuse_light, (void*)&lights[1]};
+
+    // === Spheres ===
+    // Floating central orb
+    spheres[sphere_count++] = gpu_sphere(point3(0, 1.0, -5), 0.5, &materials[3]);
+
+    // Optional floor embed orb
+    spheres[sphere_count++] = gpu_sphere(point3(0.7, 0.5, -6.0), 0.3, &materials[0]);
+
+    for (int i = 0; i < sphere_count && object_count < max_objects; i++) {
+        objects[object_count++] = hittable{hittable_type::sphere, (void*)&spheres[i]};
+    }
+
+    // === Quads (walls and lights) ===
+    quads[quad_count++] = quad(point3(-2.0, 0, -10.0), vec3(0, 2.5, 0), vec3(0, 0, 10), &materials[1]); // Left glass wall
+    quads[quad_count++] = quad(point3(2.0, 0, -10.0), vec3(0, 2.5, 0), vec3(0, 0, 10), &materials[1]);  // Right glass wall
+
+    quads[quad_count++] = quad(point3(-1.5, 2.5, -10.0), vec3(3.0, 0, 0), vec3(0, 0, 10), &materials[1]); // Ceiling mirror
+    quads[quad_count++] = quad(point3(-1.5, 0, -10.0), vec3(3.0, 0, 0), vec3(0, 0, 10), &materials[1]);   // Floor mirror
+
+    quads[quad_count++] = quad(point3(-2, 0, -15), vec3(4, 0, 0), vec3(0, 3, 0), &materials[4]); // Bright white panel
+
+
+    for (int i = 0; i < quad_count && object_count < max_objects; i++) {
+        objects[object_count++] = hittable{hittable_type::quad, (void*)&quads[i]};
+    }
+
+    // === Assemble and Render ===
+    hittable_lists[hittable_list_count++] = gpu_hittable_list{objects, object_count};
+    hittable world = hittable{hittable_type::hittable_list, (void*)&hittable_lists[0]};
+    cam.render(&world);
+
+    // === Cleanup ===
+    delete[] glasses;
+    delete[] metals;
+    delete[] lambertians;
+    delete[] lights;
+    delete[] materials;
+    delete[] quads;
+    delete[] spheres;
+    delete[] objects;
+    delete[] hittable_lists;
+}
+
+
+
+
 
 
 int main(int argc, char** argv) {
-    switch (2) {
+    switch (6) {
         case 1: {
             MPI_Init(&argc, &argv);
             mpi();
@@ -435,6 +752,9 @@ int main(int argc, char** argv) {
         } 
         case 2: cpu();      break;
         case 3: whole_image();  break;
+        case 4: light();    break;
+        case 5: floating(); break;
+        case 6: corridor(); break;
     }
 
     return 0;
