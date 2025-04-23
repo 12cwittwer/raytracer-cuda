@@ -106,6 +106,20 @@ If you want to limit the number of processes you are running, you can run the co
 mpirun -np <processes> --hostfile ./raytracer-cuda/hosts.txt ./raytracer-cuda/build/raytracer
 ```
 
+## Performance
+
+The following stats were taken on a simple scene with 6 spheres under varying complexity. The results are given in seconds. For complexity, W is the width of the image, S is the number of samples being taken for each pixel, and D is the recursive ray casting depth. The image has a 16:9 aspect ratio, so the height of the image is dependent on the width.
+
+| Complexity (W, S, D)      | CPU Time (s) | GPU Time (s) | Distributed GPU Time (s)  |
+|---------------------------|--------------|--------------|---------------------------|
+| W: 400, S: 20, D: 2       | 4.54         | 2.069        | 29.8                      |
+| W: 600, S: 50, D: 5       | 25.236       | 45.778       | 343.629                   |
+| W: 800, S: 100, D: 10     | 105.68       | 119.78       | 1129.01                   |
+| W: 800, S: 100, D: 2      | 90.046       | 69.764       | 558.635                   |
+| W: 800, S: 20, D: 20      | 18.313       | 26.517       | 187.859                   |
+|---------------------------|--------------|--------------|---------------------------|
+
+
 > In the end, my project created a simple ray tracer capable of and successfully running in a highly parallelized environment.
-> — Christian Wittwer
+> Christian Wittwer
 
