@@ -117,9 +117,9 @@ The following stats were taken on a simple scene with 6 spheres under varying co
 | W: 800, S: 100, D: 10     | 105.68       | 119.78       | 1129.01                   |
 | W: 800, S: 100, D: 2      | 90.046       | 69.764       | 558.635                   |
 | W: 800, S: 20, D: 20      | 18.313       | 26.517       | 187.859                   |
-|---------------------------|--------------|--------------|---------------------------|
 
 
-> In the end, my project created a simple ray tracer capable of and successfully running in a highly parallelized environment.
+In the end, my project created a simple ray tracer capable of and successfully running in a highly parallelized environment.
+
 > Christian Wittwer
 
