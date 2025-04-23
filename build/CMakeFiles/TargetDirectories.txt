@@ -1,3 +1,0 @@
-/home/christianw/raytracer-cuda/build/CMakeFiles/raytracer.dir
-/home/christianw/raytracer-cuda/build/CMakeFiles/edit_cache.dir
-/home/christianw/raytracer-cuda/build/CMakeFiles/rebuild_cache.dir

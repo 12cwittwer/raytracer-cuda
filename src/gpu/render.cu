@@ -24,7 +24,50 @@
 __global__ void render_kernel(
     const camera_data* cam,
     const hittable* world,
-    color* framebuffer
+    color* framebuffer,
+    int row
+) {
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = row;
+
+    if (x >= cam->image_width) return;
+
+    int pixel_index = x;
+    curandState rng;
+    int seed = 1984 + row * cam->image_width + x;
+    curand_init(seed, 0, 0, &rng);
+
+    color pixel_color(0, 0, 0);
+    for (int s = 0; s < cam->samples_per_pixel; ++s) {
+        ray r = get_ray(cam, x, y, &rng);
+        pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
+    }
+    pixel_color /= cam->samples_per_pixel;
+    framebuffer[pixel_index] = pixel_color;
+}
+
+#include "raytracer/cuda_utils.h"  // for CUDA_CHECK
+
+void launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height, int row) {
+    const dim3 threads_per_block(512, 1);
+    const dim3 num_blocks((image_width + threads_per_block.x - 1) / threads_per_block.x, 1);
+
+    // Launch kernel
+    // Try rendering the first pixel
+    // render_kernel<<<1, 1>>>(cam, world, fb);
+    render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb, row);
+
+    // Check for immediate kernel launch errors
+    CUDA_CHECK(cudaGetLastError());
+
+    // Ensure kernel is finished before moving on
+    // CUDA_CHECK(cudaDeviceSynchronize());
+}
+
+__global__ void image_render_kernel(
+    const camera_data* __restrict__ cam,
+    const hittable* __restrict__ world,
+    color* __restrict__ framebuffer
 ) {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -32,42 +75,31 @@ __global__ void render_kernel(
     if (x >= cam->image_width || y >= cam->image_height) return;
 
     int pixel_index = y * cam->image_width + x;
+
     curandState rng;
-    curand_init(1984 + pixel_index, 0, 0, &rng);
+    int seed = 1984 + y * cam->image_width + x;  // unique per pixel
+    curand_init(seed, 0, 0, &rng);
 
     color pixel_color(0, 0, 0);
     for (int s = 0; s < cam->samples_per_pixel; ++s) {
-        if (x == 0 && y == 0) {
-                cam->background.x(), cam->background.y(), cam->background.z();
-        }
-
         ray r = get_ray(cam, x, y, &rng);
-
-        if (world->data == nullptr) {
-            return;
-        }
         pixel_color += ray_color(r, cam->max_depth, world, cam->background, rng);
     }
-    framebuffer[pixel_index] = pixel_color / cam->samples_per_pixel;
+
+    pixel_color /= cam->samples_per_pixel;
+    framebuffer[pixel_index] = pixel_color;
 }
 
-#include "raytracer/cuda_utils.h"  // for CUDA_CHECK
-
-void launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height) {
-    const dim3 threads_per_block(8, 8);
+void image_launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height) {
+    const dim3 threads_per_block(16, 16);
     const dim3 num_blocks(
         (image_width + threads_per_block.x - 1) / threads_per_block.x,
         (image_height + threads_per_block.y - 1) / threads_per_block.y
     );
 
-    // Launch kernel
-    // Try rendering the first pixel
-    // render_kernel<<<1, 1>>>(cam, world, fb);
-    render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
+    image_render_kernel<<<num_blocks, threads_per_block>>>(cam, world, fb);
 
-    // Check for immediate kernel launch errors
     CUDA_CHECK(cudaGetLastError());
-
-    // Ensure kernel is finished before moving on
-    CUDA_CHECK(cudaDeviceSynchronize());
 }
+
+

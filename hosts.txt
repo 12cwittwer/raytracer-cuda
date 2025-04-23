@@ -1,0 +1,2 @@
+borin slots=2
+aorin slots=1

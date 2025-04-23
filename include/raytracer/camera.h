@@ -9,10 +9,16 @@
 #include "camera_data.h"
 #include "render.h"
 #include "raytracer/cuda_utils.h"
+#include "raytracer/PPM.h"
 
+#include <mpi.h>
 #include <vector>
+#include <chrono>
 
-extern void launch_render_kernel(const camera_data*, const hittable*, color*, int, int);
+extern void launch_render_kernel(const camera_data*, const hittable*, color*, int, int, int);
+extern void image_launch_render_kernel(const camera_data* cam, const hittable* world, color* fb, int image_width, int image_height);
+
+const int TAG_REQUEST = 1, TAG_WORK = 2, TAG_RESULT = 3, TAG_STOP = 4;
 
 class camera {
   public:
@@ -30,8 +36,102 @@ class camera {
     double defocus_angle = 0;
     double focus_dist = 10;
 
-    void render_gpu(const hittable* d_world) {
+    void render_gpu(const hittable* d_world, const int rank, const int num_procs) {
         initialize();
+    
+        color* d_fb = nullptr;
+        CUDA_CHECK(cudaMalloc(&d_fb, image_width * sizeof(color)));
+    
+        camera_data h_cam = get_camera_data();
+    
+        camera_data* d_cam = nullptr;
+        CUDA_CHECK(cudaMalloc(&d_cam, sizeof(camera_data)));
+        CUDA_CHECK(cudaMemcpy(d_cam, &h_cam, sizeof(camera_data), cudaMemcpyHostToDevice));
+    
+        while (true) {
+            int row;
+            MPI_Status status;
+    
+            MPI_Recv(&row, 1, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+            if (status.MPI_TAG == TAG_STOP) break;
+    
+            launch_render_kernel(d_cam, d_world, d_fb, image_width, image_height, row);
+    
+            std::vector<color> h_fb(image_width);
+            CUDA_CHECK(cudaMemcpy(h_fb.data(), d_fb, image_width * sizeof(color), cudaMemcpyDeviceToHost));
+    
+            std::vector<float> buffer(1 + image_width * 3); // 1 for row index
+            buffer[0] = static_cast<float>(row);
+            for (int i = 0; i < image_width; i++) {
+                buffer[1 + i * 3 + 0] = h_fb[i].x();
+                buffer[1 + i * 3 + 1] = h_fb[i].y();
+                buffer[1 + i * 3 + 2] = h_fb[i].z();
+            }
+            
+            MPI_Send(buffer.data(), 1 + image_width * 3, MPI_FLOAT, 0, TAG_RESULT, MPI_COMM_WORLD);
+            
+        }
+    
+        CUDA_CHECK(cudaFree(d_fb));
+        CUDA_CHECK(cudaFree(d_cam));
+    }
+    
+
+    void delegate(const int rank, const int num_procs) { 
+        initialize();
+    
+        auto start = std::chrono::high_resolution_clock::now();
+    
+        PPM image = PPM(image_height, image_width);
+    
+        int next_row = 0, active_workers = num_procs - 1;
+        MPI_Status status;
+    
+        // Kick off initial work
+        for (int i = 1; i < num_procs; i++) {
+            if (next_row < image_height) {
+                MPI_Send(&next_row, 1, MPI_INT, i, TAG_WORK, MPI_COMM_WORLD);
+                next_row++;
+            }
+        }
+    
+        while (active_workers > 0) {
+            std::vector<float> buffer(1 + image_width * 3);
+            MPI_Recv(buffer.data(), 1 + image_width * 3, MPI_FLOAT, MPI_ANY_SOURCE, TAG_RESULT, MPI_COMM_WORLD, &status);
+            
+            int row_index = static_cast<int>(buffer[0]);
+            int worker_rank = status.MPI_SOURCE;
+            
+            for (int i = 0; i < image_width; i++) {
+                color pixel_color(buffer[1 + i * 3 + 0],
+                                  buffer[1 + i * 3 + 1],
+                                  buffer[1 + i * 3 + 2]);
+                image.setPixel(row_index, i, pixel_color);
+            }
+                   
+    
+            if (next_row < image_height) {
+                MPI_Send(&next_row, 1, MPI_INT, worker_rank, TAG_WORK, MPI_COMM_WORLD);
+                next_row++;
+                std::cout << "\rScanlines remaining: " << (image_height - next_row) << " " << std::flush;
+            } else {
+                MPI_Send(nullptr, 0, MPI_INT, worker_rank, TAG_STOP, MPI_COMM_WORLD);
+                active_workers--;
+            }
+        }
+    
+        image.writeImage();
+    
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Execution Time: " << duration.count() / 1000.0 << " s\n";
+    }
+
+    void render_whole(const hittable* d_world) {
+        initialize();
+        auto start = std::chrono::high_resolution_clock::now();
+
+        PPM image = PPM(image_height, image_width);
     
         const int image_size = image_width * image_height;
     
@@ -47,38 +147,51 @@ class camera {
         CUDA_CHECK(cudaMemcpy(d_cam, &h_cam, sizeof(camera_data), cudaMemcpyHostToDevice));
     
         // --- Launch render kernel ---
-        launch_render_kernel(d_cam, d_world, d_fb, image_width, image_height);
+        image_launch_render_kernel(d_cam, d_world, d_fb, image_width, image_height);
     
         // --- Copy framebuffer back to host ---
         std::vector<color> h_fb(image_size);
         CUDA_CHECK(cudaMemcpy(h_fb.data(), d_fb, image_size * sizeof(color), cudaMemcpyDeviceToHost));
-    
-        // --- Output image (optional) ---
-        write_ppm(std::cout, h_fb.data(), image_height, image_width);
+
+        for (int i = 0; i < image_size; i++) {
+            image.setPixel(image_size / image_height, image_size % image_height, h_fb[i]);
+        }
     
         // --- Cleanup ---
         CUDA_CHECK(cudaFree(d_fb));
         CUDA_CHECK(cudaFree(d_cam));
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Execution Time: " << duration.count() / 1000.0 << " s\n";
+        image.writeImage();
     }
+    
     
 
     void render(const hittable* world) {
         initialize();
+        auto start = std::chrono::high_resolution_clock::now();
 
-        std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+        PPM image = PPM(image_height, image_width);
 
         for (int j = 0; j < image_height; j++) {
+            std::cout << "\rScanlines remaining: " << (image_height - j) << " " << std::flush;
             for (int i = 0; i < image_width; i++) {
                 color pixel_color(0, 0, 0);
                 for (int sample = 0; sample < samples_per_pixel; sample++) {
                     ray r = get_ray(i, j);
                     pixel_color += ray_color(r, max_depth, *world);
                 }
-                write_color(std::cout, pixel_samples_scale * pixel_color);
+                image.setPixel(j, i, pixel_samples_scale * pixel_color);
             }
         }
 
         std::clog << "\rDone.                 \n";
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        std::cout << "Execution Time: " << duration.count() / 1000.0 << " s\n";
+        image.writeImage();
     }
 
   private:
