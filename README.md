@@ -8,7 +8,7 @@ Ray tracing is inherently parallelizable: each pixel's color can be computed ind
 
 - **OpenMPI** is used to distribute rendering tasks across devices.
 - Each device offloads its portion of work to the **GPU**, leveraging **NVIDIA CUDA** for massive parallelization.
-- The project is inspired by [Ray Tracing in One Weekend][https://raytracing.github.io/books/RayTracingInOneWeekend.html], with custom modifications for GPU execution and distributed computation.
+- The project is inspired by [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html), with custom modifications for GPU execution and distributed computation.
 
 ## Features
 
@@ -106,6 +106,6 @@ If you want to limit the number of processes you are running, you can run the co
 mpirun -np <processes> --hostfile ./raytracer-cuda/hosts.txt ./raytracer-cuda/build/raytracer
 ```
 
-> _"In the end, my project created a simple ray tracer capable of and successfully running in a highly parallelized environment."_  
+> In the end, my project created a simple ray tracer capable of and successfully running in a highly parallelized environment.
 > — Christian Wittwer
 
